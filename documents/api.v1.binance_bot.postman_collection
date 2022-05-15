@@ -1,0 +1,178 @@
+{
+	"info": {
+		"_postman_id": "bd4033fe-b976-470f-ae92-c3ee7c90a328",
+		"name": "Binance_bot",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Email OTP",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/user/get_email_otp/:email",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"user",
+						"get_email_otp",
+						":email"
+					],
+					"variable": [
+						{
+							"key": "email",
+							"value": "nasirshahkin@gmail.com"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Phone OTP",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/user/get_phone_otp/:phone",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"user",
+						"get_phone_otp",
+						":phone"
+					],
+					"variable": [
+						{
+							"key": "phone",
+							"value": "8052055746"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Phone OTP Verify",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/user/verify_phone?otp=1109",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"user",
+						"verify_phone"
+					],
+					"query": [
+						{
+							"key": "otp",
+							"value": "1109"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Email OTP verify",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/user/verify_email/?otp=6141",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"user",
+						"verify_email",
+						""
+					],
+					"query": [
+						{
+							"key": "otp",
+							"value": "6141"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Post User",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/user/add_user/?password=nasir",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"user",
+						"add_user",
+						""
+					],
+					"query": [
+						{
+							"key": "password",
+							"value": "nasir"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User Login",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "Create New Password",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		}
+	]
+}
