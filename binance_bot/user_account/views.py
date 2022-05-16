@@ -12,6 +12,8 @@ from django.conf import settings
 from django.http import JsonResponse
 from rest_framework.decorators import APIView
 from rest_framework.decorators import api_view
+
+
 # Create your views here.
 
 
@@ -82,9 +84,18 @@ class UserRegisteration(APIView):
     @api_view(['POST'])
     def add_user(request):
         password = request.GET['password']
+        phone_otp = request.GET['phone_otp']
+        email_otp = request.GET['email_otp']
         invitation_code = request.GET['invitation_code']
         email = request.session.get('email')
         phone = request.session.get('phone')
+        otp = request.session['email_otp']
+        if int(email_otp) == otp and int(phone_otp) == otp:
+            pass
+        elif int(email_otp) != otp:
+            return JsonResponse({"msg": "Email Not Verified"})
+        elif int(phone_otp) != otp:
+            return JsonResponse({"msg": "Wrong OTP"})
         hash_pwd = make_password(password)
         emails = Profile.objects.filter(email=email)
         phone_no = Profile.objects.filter(phone=phone)
