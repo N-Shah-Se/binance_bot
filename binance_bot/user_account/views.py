@@ -130,10 +130,6 @@ class UserRegisteration(APIView):
             if int(otp) != phone:
                 return JsonResponse({"msg": f"Wrong OTP{phone}{otp}"})
             user = Profile.objects.filter(phone=operation)
-<<<<<<< HEAD
-=======
-	#user = Profile.objects.filter(email=email)
->>>>>>> d1a92f2e744d498e0343b7316cf3daa45094e204
         user_password = ""
         for ps in user:
             user_password = ps.password
