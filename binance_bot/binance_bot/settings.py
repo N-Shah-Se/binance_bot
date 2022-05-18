@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'user_account',
     'rest_framework',
+    'bot_app',
 ]
 
 MIDDLEWARE = [
@@ -136,3 +137,11 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+############ Binance #####
+
+SYMBOL = 'forusdt'
+
+SOCKET = "wss://stream.binance.com:9443/ws/"+SYMBOL+"@kline_1m"
+
+

@@ -143,3 +143,4 @@ class UserRegisteration(APIView):
         user = Profile.objects.filter(email=email).filter(phone=phone)
         user.update(password=make_password(password))
         return JsonResponse({"msg": "Password Changed"})
+

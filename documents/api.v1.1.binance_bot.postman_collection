@@ -11,15 +11,13 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://127.0.0.1:8000/user/get_email_otp/:email",
-					"protocol": "http",
+					"raw": "https://nshah.pythonanywhere.com/user/get_email_otp/:email",
+					"protocol": "https",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"nshah",
+						"pythonanywhere",
+						"com"
 					],
-					"port": "8000",
 					"path": [
 						"user",
 						"get_email_otp",
@@ -41,15 +39,13 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://127.0.0.1:8000/user/get_phone_otp/:phone",
-					"protocol": "http",
+					"raw": "https://nshah.pythonanywhere.com/user/get_phone_otp/:phone",
+					"protocol": "https",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"nshah",
+						"pythonanywhere",
+						"com"
 					],
-					"port": "8000",
 					"path": [
 						"user",
 						"get_phone_otp",
@@ -71,15 +67,13 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://127.0.0.1:8000/user/verify_phone?otp=1109",
-					"protocol": "http",
+					"raw": "https://nshah.pythonanywhere.com/user/verify_phone?otp=1604",
+					"protocol": "https",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"nshah",
+						"pythonanywhere",
+						"com"
 					],
-					"port": "8000",
 					"path": [
 						"user",
 						"verify_phone"
@@ -87,7 +81,7 @@
 					"query": [
 						{
 							"key": "otp",
-							"value": "1109"
+							"value": "1604"
 						}
 					]
 				}
@@ -100,15 +94,13 @@
 				"method": "POST",
 				"header": [],
 				"url": {
-					"raw": "http://127.0.0.1:8000/user/verify_email/?otp=6141",
-					"protocol": "http",
+					"raw": "https://nshah.pythonanywhere.com/user/verify_email/?otp=1347",
+					"protocol": "https",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"nshah",
+						"pythonanywhere",
+						"com"
 					],
-					"port": "8000",
 					"path": [
 						"user",
 						"verify_email",
@@ -117,7 +109,7 @@
 					"query": [
 						{
 							"key": "otp",
-							"value": "6141"
+							"value": "1347"
 						}
 					]
 				}
@@ -134,15 +126,13 @@
 					"formdata": []
 				},
 				"url": {
-					"raw": "http://127.0.0.1:8000/user/add_user/?password=nasir",
-					"protocol": "http",
+					"raw": "https://nshah.pythonanywhere.com/user/add_user/?password=nasir&invitation_code&phone_otp&email_otp",
+					"protocol": "https",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"nshah",
+						"pythonanywhere",
+						"com"
 					],
-					"port": "8000",
 					"path": [
 						"user",
 						"add_user",
@@ -152,6 +142,18 @@
 						{
 							"key": "password",
 							"value": "nasir"
+						},
+						{
+							"key": "invitation_code",
+							"value": null
+						},
+						{
+							"key": "phone_otp",
+							"value": null
+						},
+						{
+							"key": "email_otp",
+							"value": null
 						}
 					]
 				}
@@ -162,15 +164,63 @@
 			"name": "User Login",
 			"request": {
 				"method": "GET",
-				"header": []
+				"header": [],
+				"url": {
+					"raw": "https://nshah.pythonanywhere.com/user/login_user/?password=nasir123&operation&otp",
+					"protocol": "https",
+					"host": [
+						"nshah",
+						"pythonanywhere",
+						"com"
+					],
+					"path": [
+						"user",
+						"login_user",
+						""
+					],
+					"query": [
+						{
+							"key": "password",
+							"value": "nasir123"
+						},
+						{
+							"key": "operation",
+							"value": null
+						},
+						{
+							"key": "otp",
+							"value": null
+						}
+					]
+				}
 			},
 			"response": []
 		},
 		{
 			"name": "Create New Password",
 			"request": {
-				"method": "GET",
-				"header": []
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "https://nshah.pythonanywhere.com/user/change_password/?password=nasir123",
+					"protocol": "https",
+					"host": [
+						"nshah",
+						"pythonanywhere",
+						"com"
+					],
+					"path": [
+						"user",
+						"change_password",
+						""
+					],
+					"query": [
+						{
+							"key": "password",
+							"value": "nasir123"
+						}
+					]
+				}
 			},
 			"response": []
 		}
