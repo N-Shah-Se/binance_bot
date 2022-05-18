@@ -40,9 +40,9 @@ class UserRegisteration(APIView):
         message = f'OTP \n {otp}'
         a = send_otp(phone, message)
         if a:
-            return JsonResponse({"msg": f'OTP send Successfully'})
+            return JsonResponse({"msg": 'OTP send Successfully'})
         else:
-            return JsonResponse({"msg": f"OTP is sent your phone "})
+            return JsonResponse({"msg": "OTP is sent your phone "})
 
     @api_view(['GET'])
     def phone_verfication(request):
@@ -61,14 +61,13 @@ class UserRegisteration(APIView):
         request.session['email_otp'] = otp
         request.session['email'] = email
         message = f'your otp is {otp}'
-        user_email = email
         send_mail(
             'Email Verification OTP',
             message,
             'settings.EMAIL_HOST_USER',
             [email],
             fail_silently=False,)
-        return JsonResponse({"msg": f"OTP send to your email successfully"})
+        return JsonResponse({"msg": "OTP send to your email successfully"})
 
     @api_view(["POST"])
     def email_verification(request):
@@ -93,7 +92,7 @@ class UserRegisteration(APIView):
         elif int(email_otp) != email:
             return JsonResponse({"msg": f"Email Not Verified{email}{email_otp}"})
         elif int(phone_otp) != phone:
-            return JsonResponse({"msg": f"Wrong OTP{phone}{phone_ot}"})
+            return JsonResponse({"msg": f"Wrong OTP{phone}{phone_otp}"})
         hash_pwd = make_password(password)
         emails = Profile.objects.filter(email=email)
         phone_no = Profile.objects.filter(phone=phone)
@@ -118,16 +117,15 @@ class UserRegisteration(APIView):
     @api_view(['GET'])
     def userLogin(request):
         password = request.GET['password']
-        operation = request.session.get('operation')
-	otp = request.GET['otp']
-	email= ''
-	if '@' in operation:
+        operation = request.GET['operation']
+        otp = request.GET['otp']
+        if '@' in str(operation):
             email = request.session.get('email_otp')
             if int(otp) != email:
-                return JsonResponse({"msg": f"Email Not Verified{email}{email_otp}"})
+                return JsonResponse({"msg": f"Email Not Verified{email}{otp}"})
             user= Profile.objects.filter(email=operation)
         else:
-            
+
             phone = request.session.get('otp')
             if int(otp) != phone:
                 return JsonResponse({"msg": f"Wrong OTP{phone}{otp}"})
