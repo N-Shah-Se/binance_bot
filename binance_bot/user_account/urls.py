@@ -1,16 +1,3 @@
-<<<<<<< HEAD
-from django.urls import path
-from .views import UserRegisteration
-
-urlpatterns = [
-    # path('verify/<int:phone>',getPhoneNumberRegistered),
-    path('get_phone_otp/',UserRegisteration.get_phone_otp),
-    path('verify_phone/',UserRegisteration.phone_verfication),
-    path('get_email_otp/',UserRegisteration.get_email_otp),
-    path('verify_email/',UserRegisteration.email_verification),
-    path('add_user/',UserRegisteration.add_user),
-    path('login_user/',UserRegisteration.userLogin),
-=======
 from django.urls import path, include
 from .views import UserRegisteration, OtpOperation
 from rest_framework_jwt.views import  (
@@ -20,7 +7,6 @@ from rest_framework_jwt.views import  (
 )
 
 urlpatterns = [
-    # path('verify/<int:phone>',getPhoneNumberRegistered),
     path('login/', obtain_jwt_token, name='login_token'),
     path('refresh/', refresh_jwt_token, name='refresh_token'),
     path('verify/', verify_jwt_token, name='verify_token'),
@@ -30,6 +16,5 @@ urlpatterns = [
     path('verify_email/',OtpOperation.email_verification),
     path('add_user/',OtpOperation.add_user),
     # path('login_user/',UserRegisteration.userLogin),
->>>>>>> c18482a8ca497825cd36e51afef54c1020eaa062
     path('change_password/',UserRegisteration.change_password),
 ]

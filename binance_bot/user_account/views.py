@@ -105,24 +105,22 @@ class OtpOperation(views.APIView):
         phone_otp = request.GET['phone_otp']
         email_otp = request.GET['email_otp']
         invitation_code = request.GET['invitation_code']
-        email = request.session.get('email_otp')
-        phone = request.session.get('otp')
-        #        otp = request.session['email_otp']
-        if int(email_otp) == email and int(phone_otp) == phone:
-            pass
-        elif int(email_otp) != email:
-            return JsonResponse({"msg": f"Email Not Verified{email}{email_otp}"})
-        elif int(phone_otp) != phone:
-            return JsonResponse({"msg": f"Wrong OTP{phone}{phone_otp}"})
-<<<<<<< HEAD
-        hash_pwd = make_password(password)
-        email = request.session.get('email')
-        phone = request.session.get('phone')
-=======
+        # email = request.session.get('email_otp')
+        # phone = request.session.get('otp')
+        # #        otp = request.session['email_otp']
+        # if int(email_otp) == email and int(phone_otp) == phone:
+        #     pass
+        # elif int(email_otp) != email:
+        #     return JsonResponse({"msg": f"Email Not Verified{email}{email_otp}"})
+        # elif int(phone_otp) != phone:
+        #     return JsonResponse({"msg": f"Wrong OTP{phone}{phone_otp}"})
+
+        # email = request.session.get('email')
+        # phone = request.session.get('phone')
+
         # hash_pwd = make_password(password)
->>>>>>> c18482a8ca497825cd36e51afef54c1020eaa062
-        emails = Profile.objects.filter(email=email)
-        phone_no = Profile.objects.filter(phone=phone)
+        emails = Profile.objects.filter(email=email_otp)
+        phone_no = Profile.objects.filter(phone=phone_otp)
         account_exist = False
         if emails:
             account_exist = True
@@ -136,14 +134,20 @@ class OtpOperation(views.APIView):
             password = request.data['password']
             request.data['password'] = make_password(password)
             request.data._mutable = False
-            User = UserSerializer(data=request.data)
+            Users = UserSerializer(data=request.data)
 
-            Profile.objects.create_user(
-                email=email,
-                phone=phone,
-                invitation_code=invitation_code,
-                password=password
-            )
+            if Users.is_valid():
+                Users.save()
+            if status.HTTP_200_OK:
+                return JsonResponse({"User Id": Users.data['id']})
+            elif status.HTTP_500_INTERNAL_SERVER_ERROR:
+                return JsonResponse({"error": "Internal Server Error"})
+            # Profile.objects.create_user(
+            #     email=email,
+            #     phone=phone,
+            #     invitation_code=invitation_code,
+            #     password=password
+            # )
             request.session.delete('email_otp')
             request.session.delete('phone_otp')
             return JsonResponse({"msg": "User Account created"})
