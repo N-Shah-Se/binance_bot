@@ -32,12 +32,18 @@ def send_otp(number, message):
 
 class UserRegisteration(APIView):
     @api_view(['GET'])
-    def get_phone_otp(request, phone):
-        phone = phone
+    def get_phone_otp(request):
+        phone = request.GET['phone']
+        call_for = request.GET['call_for']
         request.session['phone'] = phone
         otp = random.randint(100000, 999999)
         request.session['otp'] = otp
-        message = f'OTP \n {otp}'
+        if call_for.lower() == 'signup':
+            message = f"Dear Prime User,\nYour Signup OTP for  G Flight MODE is {otp}. if this was not you, please inform support or info@gflightmode.com. Please do not share this OTP\nRegards GFM TeamOTP"
+        if call_for.lower() == 'login':
+            message = f"Dear Prime User,\n Your Login OTP for  G Flight MODE is {otp}. if this was not you, please inform support or info@gflightmode.com. Please do not share this OTP\nRegards GFM TeamOTP"
+        if call_for.lower() == 'forgot_password':
+            message = f"Dear Prime User,\n Your OTP for forgot password to G Flight MODE is {otp}. if this was not you, please inform support or info@gflightmode.com. Please do not share this OTP\nRegards GFM TeamOTP"
         a = send_otp(phone, message)
         if a:
             return JsonResponse({"msg": 'OTP send Successfully'})
@@ -56,11 +62,19 @@ class UserRegisteration(APIView):
             return JsonResponse({"msg": "Wrong OTP"})
 
     @api_view(['GET'])
-    def get_email_otp(request, email):
+    def get_email_otp(request):
         otp = random.randint(100000, 999999)
         request.session['email_otp'] = otp
+        email = request.GET['email']
+        call_for = request.GET['call_for']
         request.session['email'] = email
-        message = f'your otp is {otp}'
+        message = ""
+        if call_for.lower() == 'signup':
+            message = f"Dear Prime User,\nYour Signup OTP for  G Flight MODE is {otp}. if this was not you, please inform support or info@gflightmode.com. Please do not share this OTP\nRegards GFM TeamOTP"
+        if call_for.lower() == 'login':
+            message = f"Dear Prime User,\nYour Login OTP for  G Flight MODE is {otp}. if this was not you, please inform support or info@gflightmode.com. Please do not share this OTP\nRegards GFM TeamOTP"
+        if call_for.lower() == 'forgot_password':
+            message = f"Dear Prime User,\n Your OTP for forgot password to G Flight MODE is {otp}. if this was not you, please inform support or info@gflightmode.com. Please do not share this OTP\nRegards GFM TeamOTP"
         send_mail(
             'Email Verification OTP',
             message,
@@ -72,8 +86,9 @@ class UserRegisteration(APIView):
     @api_view(["POST"])
     def email_verification(request):
         user_otp = request.GET['otp']
-        otp = request.session['email_otp']
+        otp = request.session.get('email_otp')
         if int(user_otp) == otp:
+            request.session.delete('email_otp')
             return JsonResponse({"msg": "Email Verified"})
         else:
             return JsonResponse({"msg": "Email Not Verified"})
@@ -94,6 +109,8 @@ class UserRegisteration(APIView):
         elif int(phone_otp) != phone:
             return JsonResponse({"msg": f"Wrong OTP{phone}{phone_otp}"})
         hash_pwd = make_password(password)
+        email = request.session.get('email')
+        phone = request.session.get('phone')
         emails = Profile.objects.filter(email=email)
         phone_no = Profile.objects.filter(phone=phone)
         account_exist = False
@@ -112,6 +129,8 @@ class UserRegisteration(APIView):
                 invitation_code=invitation_code,
                 password=hash_pwd
             )
+            request.session.delete('email_otp')
+            request.session.delete('phone_otp')
             return JsonResponse({"msg": "User Account created"})
 
     @api_view(['GET'])
@@ -125,7 +144,6 @@ class UserRegisteration(APIView):
                 return JsonResponse({"msg": f"Email Not Verified{email}{otp}"})
             user= Profile.objects.filter(email=operation)
         else:
-
             phone = request.session.get('otp')
             if int(otp) != phone:
                 return JsonResponse({"msg": f"Wrong OTP{phone}{otp}"})
@@ -133,14 +151,14 @@ class UserRegisteration(APIView):
         user_password = ""
         for ps in user:
             user_password = ps.password
-        print(f"{user}")
-        if user_password:
-            if check_password(password, user_password):
-                return JsonResponse({"msg": "Login Successfully"})
-            else:
-                return JsonResponse({"msg": "Login Failed"})
+        #print(f"{user}")
+        if check_password(password,user_password):
+            #if #check_password(password, user_password):
+            return JsonResponse({"msg": "Login Successfully"})
+            #else:
+             #   return JsonResponse({"msg": f"Password Not Matched {user_password}"})
         else:
-            return JsonResponse({"msg": "Login Failed"})
+            return JsonResponse({"msg": f"Login Failed {user}"})
 
     @api_view(['POST'])
     def change_password(request):

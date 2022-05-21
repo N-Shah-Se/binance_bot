@@ -1,8 +1,5 @@
-import requests
-from django.contrib import messages
 from django.conf import settings
 from django.http import JsonResponse
-from rest_framework.decorators import APIView
 from rest_framework.decorators import api_view
 import websocket, json
 from binance.exceptions import BinanceAPIException
@@ -23,6 +20,7 @@ def on_close(ws):
 def on_error(ws,error):
     print("error")
     return JsonResponse({"msg":f"{error}"})
+
 def order(side, quantity, symbol="FORUSDT"):
     try:
         order_ = client.create_order(symbol=symbol, side=side, type=client.ORDER_TYPE_MARKET, quantity=quantity)
