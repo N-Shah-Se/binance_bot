@@ -1,17 +1,20 @@
 from django.db import models
 from django.core.validators import RegexValidator
-from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 import datetime
+from django.contrib.auth import get_user_model
 
 phone_regex = RegexValidator(regex=r'^\+?1?\d{9,15}$',
                                 message = "Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")
 
 class UserAccountManager(BaseUserManager):
-    def create_user(self, email, password=None):
+    def create_user(self, email,phone,invitation_code, password=None):
         if not email:
             raise ValueError('Users must have an email address')
         user = self.model(
             email=self.normalize_email(email),
+            phone=phone,
+            invitation_code=invitation_code,
         )
         user.set_password(password)
         user.save(using=self._db)
@@ -32,7 +35,7 @@ class UserAccountManager(BaseUserManager):
 
 
 
-class Profile(AbstractUser):
+class Profile(AbstractBaseUser):
     password = models.CharField(max_length=150)
     phone = models.CharField(max_length=17,validators=[phone_regex],unique=True)
     email = models.EmailField(max_length=100,unique=True)
@@ -44,3 +47,5 @@ class Profile(AbstractUser):
 
     objects = UserAccountManager()
     # uuid = models.UUIDField(default=uuid.uuid4,editable=False)
+    def __str__(self):
+        return self.email
