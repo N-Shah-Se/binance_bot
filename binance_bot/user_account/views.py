@@ -12,9 +12,7 @@ from django.conf import settings
 from django.http import JsonResponse
 from rest_framework.decorators import APIView
 from rest_framework.decorators import api_view
-from .serializer import UserSerializer
 from rest_framework import views, status
-from user_account.permissions import AllowOptionsAuthentication
 from rest_framework import response, permissions
 from rest_framework.decorators import permission_classes
 
@@ -35,8 +33,6 @@ def send_otp(number, message):
 
 
 class OtpOperation(views.APIView):
-    # permission_classes = (AllowOptionsAuthentication,)
-    # permission_classes = (permissions.AllowAny,)
 
     @api_view(['GET'])
     @permission_classes([permissions.AllowAny])
@@ -106,6 +102,9 @@ class OtpOperation(views.APIView):
             return JsonResponse({"msg": "Email Not Verified"})
 
 
+class UserRegisteration(APIView):
+    # permission_classes = (AllowOptionsAuthentication,)
+    # permission_classes = (permission_classes.IsAuthenticated,)
     @api_view(['POST'])
     @permission_classes([permissions.AllowAny])
     def add_user(request):
@@ -137,10 +136,10 @@ class OtpOperation(views.APIView):
         if account_exist:
             return JsonResponse({"msg": "Account already exist"})
         else:
-            request.data._mutable =True
-            password = request.data['password']
-            request.session.delete('email_otp')
-            request.session.delete('phone_otp')
+            # request.data._mutable =True
+            # password = request.data['password']
+            # request.session.delete('email_otp')
+            # request.session.delete('phone_otp')
             Profile.objects.create_user(
                 email=email,
                 phone=phone,
@@ -149,39 +148,35 @@ class OtpOperation(views.APIView):
             )
             return JsonResponse({"msg": "User Account created"})
 
+    @api_view(['GET'])
+    @permission_classes([permissions.AllowAny])
+    def userLogin(request):
+        password = request.GET['password']
+        operation = request.GET['operation']
+        otp = request.GET['otp']
+        if '@' in str(operation):
+            email = request.session.get('email_otp')
+            if int(otp) != email:
+                return JsonResponse({"msg": f"Email Not Verified{email}{otp}"})
+            user = Profile.objects.get(email=operation)
+        else:
 
-class UserRegisteration(APIView):
-    permission_classes = (AllowOptionsAuthentication,)
-
-    # @api_view(['GET'])
-    # def userLogin(request):
-    #     password = request.GET['password']
-    #     operation = request.GET['operation']
-    #     otp = request.GET['otp']
-    #     if '@' in str(operation):
-    #         email = request.session.get('email_otp')
-    #         if int(otp) != email:
-    #             return JsonResponse({"msg": f"Email Not Verified{email}{otp}"})
-    #         user = Profile.objects.filter(email=operation)
-    #     else:
-    #
-    #         phone = request.session.get('otp')
-    #         if int(otp) != phone:
-    #             return JsonResponse({"msg": f"Wrong OTP{phone}{otp}"})
-    #         user = Profile.objects.filter(phone=operation)
-    #     user_password = ""
-    #     for ps in user:
-    #         user_password = ps.password
-    #     print(f"{user}")
-    #     if user_password:
-    #         if check_password(password, user_password):
-    #             return JsonResponse({"msg": "Login Successfully"})
-    #         else:
-    #             return JsonResponse({"msg": "Login Failed"})
-    #     else:
-    #         return JsonResponse({"msg": "Login Failed"})
+            phone = request.session.get('otp')
+            if int(otp) != phone:
+                return JsonResponse({"msg": f"Wrong OTP{phone}{otp}"})
+            user = Profile.objects.get(phone=operation)
+        if user:
+            if check_password(password, user.password):
+                # user.generate_jwt_token()
+                tokens = user.token
+                return JsonResponse({"msg": f"{tokens}"})
+            else:
+                return JsonResponse({"msg": "Username or Password is Incorrect"})
+        else:
+            return JsonResponse({"msg": f"Login Failed"})
 
     @api_view(['POST'])
+    @permission_classes([permissions.IsAuthenticated])
     def change_password(request):
         password = request.GET['password']
         email = request.session.get('email')

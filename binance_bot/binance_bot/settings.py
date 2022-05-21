@@ -51,7 +51,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'bot_app',
-
 ]
 
 MIDDLEWARE = [
@@ -184,15 +183,24 @@ JWT_AUTH = {
     'JWT_AUTH_COOKIE': None,
 }
 
-
-
+# REST_FRAMEWORK = {
+#     'DEFAULT_PERMISSION_CLASSES': (
+#         'rest_framework.permissions.IsAuthenticated',
+#     ),
+#     'DEFAULT_AUTHENTICATION_CLASSES': (
+#     # 'user_account.backends.JWTAuthentication',
+#     'rest_framework.authentication.SessionAuthentication',
+#     'rest_framework.authentication.BasicAuthentication',
+#     'rest_framework_simplejwt.authentication.JWTAuthentication',
+#     ),
+# }
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
         'user_account.permissions.AllowOptionsAuthentication',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        # 'user_manager.backends.JWTAuthentication'
+        'user_account.backends.JWTAuthentication',
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
