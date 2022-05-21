@@ -12,6 +12,10 @@ from django.conf import settings
 from django.http import JsonResponse
 from rest_framework.decorators import APIView
 from rest_framework.decorators import api_view
+from .serializer import UserSerializer
+from rest_framework import views, status
+from user_account.permissions import AllowOptionsAuthentication
+from rest_framework import response, permissions
 
 
 # Create your views here.
@@ -30,7 +34,9 @@ def send_otp(number, message):
     return requests.request("POST", url, data=querystring, headers=headers)
 
 
-class UserRegisteration(APIView):
+class OtpOperation(views.APIView):
+    permission_classes = [permissions.AllowAny]
+
     @api_view(['GET'])
     def get_phone_otp(request):
         phone = request.GET['phone']
@@ -80,7 +86,7 @@ class UserRegisteration(APIView):
             message,
             'settings.EMAIL_HOST_USER',
             [email],
-            fail_silently=False,)
+            fail_silently=False, )
         return JsonResponse({"msg": "OTP send to your email successfully"})
 
     @api_view(["POST"])
@@ -101,20 +107,23 @@ class UserRegisteration(APIView):
         invitation_code = request.GET['invitation_code']
         email = request.session.get('email_otp')
         phone = request.session.get('otp')
-#        otp = request.session['email_otp']
+        #        otp = request.session['email_otp']
         if int(email_otp) == email and int(phone_otp) == phone:
             pass
         elif int(email_otp) != email:
             return JsonResponse({"msg": f"Email Not Verified{email}{email_otp}"})
         elif int(phone_otp) != phone:
             return JsonResponse({"msg": f"Wrong OTP{phone}{phone_otp}"})
+<<<<<<< HEAD
         hash_pwd = make_password(password)
         email = request.session.get('email')
         phone = request.session.get('phone')
+=======
+        # hash_pwd = make_password(password)
+>>>>>>> c18482a8ca497825cd36e51afef54c1020eaa062
         emails = Profile.objects.filter(email=email)
         phone_no = Profile.objects.filter(phone=phone)
         account_exist = False
-        #print(email, phone)
         if emails:
             account_exist = True
         if phone_no:
@@ -123,15 +132,25 @@ class UserRegisteration(APIView):
         if account_exist:
             return JsonResponse({"msg": "Account already exist"})
         else:
-            Profile.objects.create(
-                phone=phone,
+            request.data._mutable = True
+            password = request.data['password']
+            request.data['password'] = make_password(password)
+            request.data._mutable = False
+            User = UserSerializer(data=request.data)
+
+            Profile.objects.create_user(
                 email=email,
+                phone=phone,
                 invitation_code=invitation_code,
-                password=hash_pwd
+                password=password
             )
             request.session.delete('email_otp')
             request.session.delete('phone_otp')
             return JsonResponse({"msg": "User Account created"})
+
+
+class UserRegisteration(APIView):
+    permission_classes = (AllowOptionsAuthentication,)
 
     @api_view(['GET'])
     def userLogin(request):
@@ -142,7 +161,7 @@ class UserRegisteration(APIView):
             email = request.session.get('email_otp')
             if int(otp) != email:
                 return JsonResponse({"msg": f"Email Not Verified{email}{otp}"})
-            user= Profile.objects.filter(email=operation)
+            user = Profile.objects.filter(email=operation)
         else:
             phone = request.session.get('otp')
             if int(otp) != phone:
