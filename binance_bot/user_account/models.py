@@ -8,11 +8,13 @@ phone_regex = RegexValidator(regex=r'^\+?1?\d{9,15}$',
                                 message = "Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")
 
 class UserAccountManager(BaseUserManager):
-    def create_user(self, email, password=None):
+    def create_user(self, email,phone,invitation_code, password=None):
         if not email:
             raise ValueError('Users must have an email address')
         user = self.model(
             email=self.normalize_email(email),
+            phone=phone,
+            invitation_code=invitation_code,
         )
         user.set_password(password)
         user.save(using=self._db)
