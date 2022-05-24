@@ -15,6 +15,9 @@ from rest_framework.decorators import api_view
 from rest_framework import views, status
 from rest_framework import response, permissions
 from rest_framework.decorators import permission_classes
+from django.core.exceptions import ObjectDoesNotExist
+from django.http import Http404
+
 
 # Create your views here.
 
@@ -49,10 +52,11 @@ class OtpOperation(views.APIView):
         if call_for.lower() == 'forgot_password':
             message = f"Dear Prime User,\n Your OTP for forgot password to G Flight MODE is {otp}. if this was not you, please inform support or info@gflightmode.com. Please do not share this OTP\nRegards GFM TeamOTP"
         a = send_otp(phone, message)
+
         if a:
-            return JsonResponse({"msg": 'OTP send Successfully'})
+            return JsonResponse({"success": True, "message": 'Phone OTP sent Successfully'})
         else:
-            return JsonResponse({"msg": "OTP Sending Failed "})
+            return JsonResponse({"success": False, "message": 'OTP Sending Failed'})
 
     @api_view(['GET'])
     @permission_classes([permissions.AllowAny])
@@ -62,10 +66,9 @@ class OtpOperation(views.APIView):
 
         if int(user_otp) == otp:
             request.session.delete('otp')
-            return JsonResponse({"msg": "Verified"})
+            return JsonResponse({"success": True, "message": "Phone Otp Verified"})
         else:
-            return JsonResponse({"msg": "Wrong OTP"})
-
+            return JsonResponse({"success": False, "message": "Phone Otp Not Verified"})
 
     @api_view(['GET'])
     @permission_classes([permissions.AllowAny])
@@ -88,7 +91,10 @@ class OtpOperation(views.APIView):
             'settings.EMAIL_HOST_USER',
             [email],
             fail_silently=False, )
-        return JsonResponse({"msg": "OTP send to your email successfully"})
+        if status.HTTP_200_OK:
+            return JsonResponse({"success": True, "message": 'OTP send Successfully'})
+        else:
+            return JsonResponse({"success": False, "message": 'OTP Sending Failed'})
 
     @api_view(["POST"])
     @permission_classes([permissions.AllowAny])
@@ -97,9 +103,9 @@ class OtpOperation(views.APIView):
         otp = request.session.get('email_otp')
         if int(user_otp) == otp:
             request.session.delete('email_otp')
-            return JsonResponse({"msg": "Email Verified"})
+            return JsonResponse({"success": True, "message": "Otp Verified"})
         else:
-            return JsonResponse({"msg": "Email Not Verified"})
+            return JsonResponse({"success": False, "message": "Email Otp Not Verified"})
 
 
 class UserRegisteration(APIView):
@@ -116,11 +122,11 @@ class UserRegisteration(APIView):
         phone = request.session.get('otp')
         # #        otp = request.session['email_otp']
         if int(email_otp) == email and int(phone_otp) == phone:
-             pass
+            pass
         elif int(email_otp) != email:
-             return JsonResponse({"msg": f"Email Not Verified{email}{email_otp}"})
+            return JsonResponse({"success": False, "message": "Email Otp Not Verified"})
         elif int(phone_otp) != phone:
-             return JsonResponse({"msg": f"Wrong OTP{phone}{phone_otp}"})
+            return JsonResponse({"success": False, "message": "Phone Otp Not Verified"})
 
         email = request.session.get('email')
         phone = request.session.get('phone')
@@ -134,7 +140,7 @@ class UserRegisteration(APIView):
         if phone_no:
             account_exist = True
         if account_exist:
-            return JsonResponse({"msg": "Account already exist"})
+            return JsonResponse({"success": False, "message": "Account already existed with following info"})
         else:
             # request.data._mutable =True
             # password = request.data['password']
@@ -146,7 +152,11 @@ class UserRegisteration(APIView):
                 invitation_code=invitation_code,
                 password=password
             )
-            return JsonResponse({"msg": "User Account created"})
+            if status.HTTP_201_CREATED:
+                return JsonResponse({"success": True, "message": "Account Created"})
+            elif status.HTTP_500_INTERNAL_SERVER_ERROR:
+                return JsonResponse({"success": False, "message": "Server Error"})
+            # return JsonResponse({"msg": "User Account created"})
 
     @api_view(['GET'])
     @permission_classes([permissions.AllowAny])
@@ -157,30 +167,48 @@ class UserRegisteration(APIView):
         if '@' in str(operation):
             email = request.session.get('email_otp')
             if int(otp) != email:
-                return JsonResponse({"msg": f"Email Not Verified{email}{otp}"})
-            user = Profile.objects.get(email=operation)
+                return JsonResponse({"success": False, "message": "Email Otp Not Verified"})
+            try:
+                user = Profile.objects.get(email=operation)
+            except:
+                return JsonResponse({"success": False, "message": "User Record Not Found"})
         else:
-
             phone = request.session.get('otp')
             if int(otp) != phone:
-                return JsonResponse({"msg": f"Wrong OTP{phone}{otp}"})
-            user = Profile.objects.get(phone=operation)
+                return JsonResponse({"success": False, "message": "Phone Otp Not Verified"})
+            try:
+                user = Profile.objects.get(phone=operation)
+            except:
+                return JsonResponse({"success": False, "message": "User Record Not Found"})
         if user:
             if check_password(password, user.password):
                 # user.generate_jwt_token()
                 tokens = user.token
-                return JsonResponse({"msg": f"{tokens}"})
+                data = {"access_tokens": tokens, "email": user.email,"phone":user.phone}
+                return JsonResponse({"data": data, "message": "Successfull Login"})
             else:
-                return JsonResponse({"msg": "Username or Password is Incorrect"})
+                return JsonResponse({"success": False, "message": "Login Failed"})
         else:
-            return JsonResponse({"msg": f"Login Failed"})
+            if status.HTTP_500_INTERNAL_SERVER_ERROR:
+                return JsonResponse({"success": False, "message": "Internal Server Error"})
+            else:
+                return JsonResponse({"success": False, "message": "Invalid email or password"})
 
     @api_view(['POST'])
-    @permission_classes([permissions.IsAuthenticated])
+    @permission_classes([permissions.AllowAny])
     def change_password(request):
         password = request.GET['password']
         email = request.session.get('email')
         phone = request.session.get('phone')
+        # email = ''
+        # phone = ''
+
         user = Profile.objects.filter(email=email).filter(phone=phone)
         user.update(password=make_password(password))
-        return JsonResponse({"msg": "Password Changed"})
+        if user:
+            if status.HTTP_200_OK:
+                return JsonResponse({"success": True, "message": "Password Changed"})
+        elif len(user) == 0:
+            return JsonResponse({"success": False, "message": "User Record Not Found"})
+        else:
+            return JsonResponse({"success": False, "message": "Internal Server Error"})
