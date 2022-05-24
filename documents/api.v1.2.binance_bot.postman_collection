@@ -11,22 +11,28 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "https://nshah.pythonanywhere.com/user/get_email_otp/:email",
-					"protocol": "https",
+					"raw": "http://127.0.0.1:8000/user/get_email_otp/?email=nasirshahrst@gmail.com&call_for=login",
+					"protocol": "http",
 					"host": [
-						"nshah",
-						"pythonanywhere",
-						"com"
+						"127",
+						"0",
+						"0",
+						"1"
 					],
+					"port": "8000",
 					"path": [
 						"user",
 						"get_email_otp",
-						":email"
+						""
 					],
-					"variable": [
+					"query": [
 						{
 							"key": "email",
-							"value": "nasirshahkin@gmail.com"
+							"value": "nasirshahrst@gmail.com"
+						},
+						{
+							"key": "call_for",
+							"value": "login"
 						}
 					]
 				}
@@ -39,7 +45,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "https://nshah.pythonanywhere.com/user/get_phone_otp/:phone",
+					"raw": "https://nshah.pythonanywhere.com/user/get_phone_otp/?phone&call_for",
 					"protocol": "https",
 					"host": [
 						"nshah",
@@ -49,12 +55,16 @@
 					"path": [
 						"user",
 						"get_phone_otp",
-						":phone"
+						""
 					],
-					"variable": [
+					"query": [
 						{
 							"key": "phone",
-							"value": "8052055746"
+							"value": null
+						},
+						{
+							"key": "call_for",
+							"value": null
 						}
 					]
 				}
@@ -219,6 +229,37 @@
 							"key": "password",
 							"value": "nasir123"
 						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Start Bot Operation",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"api_key\":\"mHbADcqgQtfCcFT7nDb9220RqKJss02BRqpdZ89PP73PHAgQkaBqHDX4m5iESNBX\",\r\n    \"secret_key\":\"Ii13143w66Lf18Iiu4fvUFSLAoI7ZriFu9douvGBix8aTH1aRfLeF4DODQPN88Qt\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://nshah.pythonanywhere.com/bot/start_bot/",
+					"protocol": "https",
+					"host": [
+						"nshah",
+						"pythonanywhere",
+						"com"
+					],
+					"path": [
+						"bot",
+						"start_bot",
+						""
 					]
 				}
 			},
