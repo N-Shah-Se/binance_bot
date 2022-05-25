@@ -184,7 +184,7 @@ class UserRegisteration(APIView):
             if check_password(password, user.password):
                 # user.generate_jwt_token()
                 tokens = user.token
-                data = {"access_tokens": tokens, "email": email}
+                data = {"access_tokens": tokens, "email": user.email}
                 return JsonResponse({"data": data, "message": "Successfull Login"})
             else:
                 return JsonResponse({"success": False, "message": "Login Failed"})
@@ -200,8 +200,6 @@ class UserRegisteration(APIView):
         password = request.GET['password']
         email = request.session.get('email')
         phone = request.session.get('phone')
-        # email = ''
-        # phone = ''
 
         user = Profile.objects.filter(email=email).filter(phone=phone)
         user.update(password=make_password(password))
