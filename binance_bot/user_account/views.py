@@ -12,7 +12,7 @@ from django.conf import settings
 from django.http import JsonResponse
 from rest_framework.decorators import APIView
 from rest_framework.decorators import api_view
-from rest_framework import views, status
+from rest_framework import views, status, serializers
 from rest_framework import response, permissions
 from rest_framework.decorators import permission_classes
 from django.core.exceptions import ObjectDoesNotExist
@@ -56,7 +56,10 @@ class OtpOperation(views.APIView):
         if a:
             return JsonResponse({"success": True, "message": 'Phone OTP sent Successfully'})
         else:
-            return JsonResponse({"success": False, "message": 'OTP Sending Failed'})
+            # return JsonResponse({"success": False, "message": 'OTP Sending Failed'})
+            res = serializers.ValidationError({'message':'OTP Sending Failed', 'status_code':'400'})
+            raise res
+
 
     @api_view(['GET'])
     @permission_classes([permissions.AllowAny])
@@ -68,7 +71,9 @@ class OtpOperation(views.APIView):
             request.session.delete('otp')
             return JsonResponse({"success": True, "message": "Phone Otp Verified"})
         else:
-            return JsonResponse({"success": False, "message": "Phone Otp Not Verified"})
+            # return JsonResponse({"success": False, "message": "Phone Otp Not Verified"})
+            res = serializers.ValidationError({'message':'Phone Otp Not Verified', 'status_code':'400'})
+            raise res
 
     @api_view(['GET'])
     @permission_classes([permissions.AllowAny])
@@ -94,7 +99,9 @@ class OtpOperation(views.APIView):
         if status.HTTP_200_OK:
             return JsonResponse({"success": True, "message": 'OTP send Successfully'})
         else:
-            return JsonResponse({"success": False, "message": 'OTP Sending Failed'})
+            # return JsonResponse({"success": False, "message": 'OTP Sending Failed'})
+            res = serializers.ValidationError({'message':'OTP Sending Failed', 'status_code':'400'})
+            raise res
 
     @api_view(["POST"])
     @permission_classes([permissions.AllowAny])
@@ -105,7 +112,9 @@ class OtpOperation(views.APIView):
             request.session.delete('email_otp')
             return JsonResponse({"success": True, "message": "Otp Verified"})
         else:
-            return JsonResponse({"success": False, "message": "Email Otp Not Verified"})
+            # return JsonResponse({"success": False, "message": "Email Otp Not Verified"})
+            res = serializers.ValidationError({'message':'Email OTP not verified', 'status_code':'400'})
+            raise res
 
 
 class UserRegisteration(APIView):
@@ -124,9 +133,13 @@ class UserRegisteration(APIView):
         if int(email_otp) == email and int(phone_otp) == phone:
             pass
         elif int(email_otp) != email:
-            return JsonResponse({"success": False, "message": "Email Otp Not Verified"})
+            # return JsonResponse({"success": False, "message": "Email Otp Not Verified"})
+            res = serializers.ValidationError({'message':'Email OTP not verified', 'status_code':'400'})
+            raise res
         elif int(phone_otp) != phone:
-            return JsonResponse({"success": False, "message": "Phone Otp Not Verified"})
+            # return JsonResponse({"success": False, "message": "Phone Otp Not Verified"})
+            res = serializers.ValidationError({'message':'Phone OTP not verified', 'status_code':'400'})
+            raise res
 
         email = request.session.get('email')
         phone = request.session.get('phone')
@@ -140,7 +153,10 @@ class UserRegisteration(APIView):
         if phone_no:
             account_exist = True
         if account_exist:
-            return JsonResponse({"success": False, "message": "Account already existed with following info"})
+            # return JsonResponse({"success": False, "message": "Account already existed with following info"})
+            res = serializers.ValidationError({'message':'Account already existed with following info', 'status_code':'400'})
+            raise res
+
         else:
             # request.data._mutable =True
             # password = request.data['password']
@@ -155,7 +171,9 @@ class UserRegisteration(APIView):
             if status.HTTP_201_CREATED:
                 return JsonResponse({"success": True, "message": "Account Created"})
             elif status.HTTP_500_INTERNAL_SERVER_ERROR:
-                return JsonResponse({"success": False, "message": "Server Error"})
+                # return JsonResponse({"success": False, "message": "Server Error"})
+                res = serializers.ValidationError({'message':'Internal Server Error', 'status_code':'500'})
+                raise res
             # return JsonResponse({"msg": "User Account created"})
 
     @api_view(['GET'])
@@ -167,19 +185,31 @@ class UserRegisteration(APIView):
         if '@' in str(operation):
             email = request.session.get('email_otp')
             if int(otp) != email:
-                return JsonResponse({"success": False, "message": "Email Otp Not Verified"})
+                # return JsonResponse({"success": False, "message": "Email Otp Not Verified"})
+                res = serializers.ValidationError({'message':'Invalid  otp', 'status_code':'400'})
+                # res.status_code = 200
+                raise res
             try:
                 user = Profile.objects.get(email=operation)
             except:
-                return JsonResponse({"success": False, "message": "User Record Not Found"})
+                # return JsonResponse({"success": False, "message": "User Record Not Found"})
+                res = serializers.ValidationError({'message':'User not exists, please signup first.', 'status_code':'400'})
+                res.status_code = 200
+                raise res
         else:
             phone = request.session.get('otp')
             if int(otp) != phone:
-                return JsonResponse({"success": False, "message": "Phone Otp Not Verified"})
+                res = serializers.ValidationError({'message':'Invalid  otp', 'status_code':'400'})
+                # res.status_code = 200
+                raise res
+                # return JsonResponse({"success": False, "message": "Phone Otp Not Verified"})
             try:
                 user = Profile.objects.get(phone=operation)
             except:
-                return JsonResponse({"success": False, "message": "User Record Not Found"})
+                # return JsonResponse({"success": False, "message": "User Record Not Found"})
+                res = serializers.ValidationError({'message':'User not exists, please signup first.', 'status_code':'400'})
+                # res.status_code = 200
+                raise res
         if user:
             if check_password(password, user.password):
                 # user.generate_jwt_token()
@@ -187,12 +217,22 @@ class UserRegisteration(APIView):
                 data = {"access_tokens": tokens, "email": user.email}
                 return JsonResponse({"data": data, "message": "Successfull Login"})
             else:
-                return JsonResponse({"success": False, "message": "Login Failed"})
+                res = serializers.ValidationError({'message':'Invalid password', 'status_code':'400'})
+                # res.status_code = 200
+                raise res
+                # return JsonResponse({"success": False, "message": "Login Failed"})
         else:
             if status.HTTP_500_INTERNAL_SERVER_ERROR:
-                return JsonResponse({"success": False, "message": "Internal Server Error"})
+                # return JsonResponse({"success": False, "message": "Internal Server Error"})
+                res = serializers.ValidationError({'message':'Internal Server Error', 'status_code':'500'})
+                # res.status_code = 200
+                raise res
+
             else:
-                return JsonResponse({"success": False, "message": "Invalid email or password"})
+                # return JsonResponse({"success": False, "message": "Invalid email or password"})
+                res = serializers.ValidationError({'message':'Invalid email or password', 'status_code':'400'})
+                # res.status_code = 200
+                raise res
 
     @api_view(['POST'])
     @permission_classes([permissions.AllowAny])
@@ -207,6 +247,11 @@ class UserRegisteration(APIView):
             if status.HTTP_200_OK:
                 return JsonResponse({"success": True, "message": "Password Changed"})
         elif len(user) == 0:
-            return JsonResponse({"success": False, "message": "User Record Not Found"})
+            # return JsonResponse({"success": False, "message": "User Record Not Found"})
+            res = serializers.ValidationError({'message':'User not exists, please signup first.', 'status_code':'400'})
+            # res.status_code = 200
+            raise res
         else:
-            return JsonResponse({"success": False, "message": "Internal Server Error"})
+            res = serializers.ValidationError({'message':'Internal Server Error', 'status_code':'500'})
+            # res.status_code = 200
+            raise res
