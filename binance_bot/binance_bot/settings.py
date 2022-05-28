@@ -143,8 +143,8 @@ USE_TZ = True
 # )
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-STATIC_ROOT="/home/nshah/binance_bot/binance_bot/static"
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+# STATIC_ROOT="/home/nshah/binance_bot/binance_bot/static"
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 STATIC_URL = '/static/'
 
