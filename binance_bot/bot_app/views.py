@@ -12,9 +12,9 @@ from rest_framework.decorators import permission_classes
 import requests
 from datetime import datetime
 from time import sleep
-sell_limit, buy_limit = 0, 0
+sell_limit,buy_limit = 0,0
 client = None
-
+from rest_framework.views import APIView
 
 # Create your views here.
 
