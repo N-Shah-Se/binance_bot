@@ -81,6 +81,7 @@ class OtpOperation(views.APIView):
         otp = random.randint(100000, 999999)
         request.session['email_otp'] = otp
         email = request.GET['email']
+        print(otp)
         call_for = request.GET['call_for']
         request.session['email'] = email
         message = ""
@@ -186,7 +187,7 @@ class UserRegisteration(APIView):
             email = request.session.get('email_otp')
             if int(otp) != email:
                 # return JsonResponse({"success": False, "message": "Email Otp Not Verified"})
-                res = serializers.ValidationError({'message':'Invalid  otp', 'status_code':'400'})
+                res = serializers.ValidationError({'message':f'Invalid  otp{email}{otp}', 'status_code':'400'})
                 # res.status_code = 200
                 raise res
             try:

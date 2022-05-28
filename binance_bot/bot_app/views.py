@@ -1,90 +1,124 @@
+import threading
+
 from django.conf import settings
 from django.http import JsonResponse
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, APIView
 import websocket, json
 from binance.exceptions import BinanceAPIException
 from binance.client import Client
-sell_limit,buy_limit = 0,0
+import json
+from rest_framework import response, permissions
+from rest_framework.decorators import permission_classes
+import requests
+from datetime import datetime
+from time import sleep
+sell_limit, buy_limit = 0, 0
 client = None
 
-def on_open(ws):
-    # return JsonResponse({"msg": "Connection Oppened"})
-    print("Started")
-
-
-def on_close(ws):
-    # return JsonResponse({"msg": "Connection Closes"})
-    print("Closed")
-
-
-def on_error(ws,error):
-    print("error")
-    return JsonResponse({"msg":f"{error}"})
-
-def order(side, quantity, symbol="FORUSDT"):
-    try:
-        order_ = client.create_order(symbol=symbol, side=side, type=client.ORDER_TYPE_MARKET, quantity=quantity)
-    except BinanceAPIException as ex:
-        return JsonResponse({"Failure": f"{ex}"})
-    return JsonResponse({"msg": f"{order_}"})
-
-def on_message(ws,message, sell_limit=sell_limit, buy_limit=buy_limit):
-    candle_data = json.loads(message)
-    closing_rate = float(candle_data['k']['c'])
-    if closing_rate >= sell_limit:
-        order("SELL", 100)
-    elif closing_rate <= buy_limit:
-        order("BUY", 100)
-#
-#
-# def on_order():
-#     pass
 
 # Create your views here.
 
-@api_view(['POST'])
-def start_bot(request):
-    api_key = request.data['api_key']
-    secret_key = request.data['secret_key']
-    print("hellloooooo")
-    client = Client(api_key, secret_key)
-    sell_limit, buy_limit = 0.055, 0.045
-    websocket_app =websocket.WebSocketApp(settings.SOCKET, on_open=on_open, on_close=on_close, on_error=on_error,on_message=on_message)
-    websocket_app.run_forever()
+class BotOperation(APIView):
+    @api_view(['POST'])
+    @permission_classes([permissions.AllowAny])
+    def start_bot(request):
+        api_key = request.data['api_key']
+        secret_key = request.data['secret_key']
+        print("hellloooooo")
+        client = Client(api_key, secret_key)
+        request.session['client'] = client
+        sell_limit, buy_limit = 0.055, 0.045
+
+        # return JsonResponse({"a":"b"})
+        def on_open(ws):
+            print("Started")
+
+        def on_close(ws):
+            # return JsonResponse({"msg": "Connection Closes"})
+            print("Closed")
+
+        def on_error(ws, error):
+            print("error")
+            return JsonResponse({"msg": f"{error}"})
+
+        def order(side, quantity, symbol="FORUSDT"):
+            try:
+                order_ = client.create_order(symbol=symbol, side=side, type=client.ORDER_TYPE_MARKET, quantity=quantity)
+            except BinanceAPIException as ex:
+                return JsonResponse({"Failure": f"{ex}"})
+            return JsonResponse({"msg": f"{order_}"})
+
+        def on_message(ws, message, sell_limit=sell_limit, buy_limit=buy_limit):
+            candle_data = json.loads(message)
+            closing_rate = float(candle_data['k']['c'])
+            if closing_rate >= sell_limit:
+                order("SELL", 100)
+            elif closing_rate <= buy_limit:
+                order("BUY", 100)
+
+        websocket_app = websocket.WebSocketApp(settings.SOCKET, on_open=on_open, on_close=on_close, on_error=on_error,
+                                               on_message=on_message)
+        websocket_app.run_forever()
+
+    @api_view(['GET'])
+    @permission_classes([permissions.AllowAny])
+    def live_price(request):
 
 
-#
-#     ##### Multiple Operations #####
-#
-#     def on_open():
-#         return JsonResponse({"msg": "Connection Oppened"})
-#         # print("Started")
-#
-#     def on_close():
-#         return JsonResponse({"msg": "Connection Closes"})
-#         # print("Closed")
-#
-#     def on_error(error):
-#         return JsonResponse({"Error": f"{error}"})
-#
-#     def order(side, quantity, symbol="FORUSDT"):
-#         try:
-#             order_ = client.create_order(symbol=symbol, side=side, type=client.ORDER_TYPE_MARKET, quantity=quantity)
-#         except BinanceAPIException as ex:
-#             return JsonResponse({"Failure": f"{ex}"})
-#         return JsonResponse({"msg": f"{order_}"})
-#
-#     def on_message(message, sell_limit=sell_limit, buy_limit=buy_limit):
-#         candle_data = json.loads(message)
-#         closing_rate = float(candle_data['k']['c'])
-#         if closing_rate >= sell_limit:
-#             order("SELL", 100)
-#         elif closing_rate <= buy_limit:
-#             order("BUY", 100)
-#
-#     websocket_app =websocket.WebSocketApp(settings.SOCKET, on_open=on_open, on_close=on_close, on_error=on_error,on_message=on_message)
-#     websocket_app.run_forever()
+        key = "https://api.binance.com/api/v3/ticker/price?symbol="
 
+        currencies = ["BTCUSDT", "ETHUSDT", "AAVEUSDT"]
+
+        data_list = []
+
+        # def on_message(ws, msg):
+        #     message = json.loads(msg)
+        #     messageData = message['k']
+        #
+        #     if messageData['x']:
+        #         # get_data(messageData)
+        #         timestamp = float(messageData['t'])
+        #         symbol = messageData['s']
+        #         interval = messageData['i']
+        #         closeprice = float(messageData['c'])
+        #         openprice = float(messageData['o'])
+        #         highprice = float(messageData['h'])
+        #         lowprice = float(messageData['l'])
+        #         datetime_ob = datetime.fromtimestamp(timestamp / 1000)
+        #
+        #         data = {'timestamp': timestamp, 'symbol': symbol, 'interval': interval, 'closeprice': closeprice,
+        #                 'openprice': openprice, 'highprice': highprice, 'lowprice': lowprice,
+        #                 'datetime_ob': datetime_ob}
+        #
+        #         print(data)
+        #         return JsonResponse(data)
+        #
+        # def on_open(ws):
+        #     print('Connected!')
+        #
+        # def on_error(wsapp, err):
+        #     print("Got a an error: ", err)
+        #
+        # def runwss(url):
+        #     stream = websocket.WebSocketApp(url, on_error=on_error, on_open=on_open, on_message=on_message)
+        #     stream.run_forever()
+        def sock_url(url):
+            return requests.get(url)
+        while True:
+            for i in currencies:
+                url = key + i
+                a=sock_url(url)
+                return JsonResponse({"data":f"{a}"})
+                # sleep(2)
+                sock = f"wss://stream.binance.com:9443/ws/{i.lower()}@kline_1m"
+            # thread = threading.Thread(target=runwss(sock))
+            # thread.start()
+            # websocket_app = websocket.WebSocketApp(sock,on_close=on_close,on_message = on_message)
+            # websocket_app.run_forever()
+        #     data = requests.get(url)
+        #     data = data.json()
+        #     data_list.append(data)
+        # return JsonResponse({"data": data_list})
 
 # import websocket, json, numpy
 # from binance.client import Client
