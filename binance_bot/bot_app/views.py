@@ -8,6 +8,7 @@ from rest_framework import response, permissions
 from rest_framework.decorators import permission_classes
 sell_limit,buy_limit = 0,0
 client = None
+from rest_framework.views import APIView
 
 class BotOperation(APIView):
     @api_view(['POST'])
