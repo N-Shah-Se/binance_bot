@@ -45,11 +45,11 @@ class BotOperation(APIView):
     @api_view(['GET'])
     @permission_classes([permissions.AllowAny])
     def start_bot(request):
-        user_otp = request.GET['otp']
-        otp = request.session.get('otp')
-        if int(user_otp) != otp:
-            return JsonResponse({"success": False, "message": "Phone Otp Not Verified"})
-        request.session.delete('otp')
+        # user_otp = request.GET['otp']
+        # otp = request.session.get('otp')
+        # if int(user_otp) != otp:
+        #     return JsonResponse({"success": False, "message": "Phone Otp Not Verified"})
+        # request.session.delete('otp')
         sell_limit, buy_limit = 0.055, 0.045
         client = request.session.get('client')
 
@@ -76,6 +76,7 @@ class BotOperation(APIView):
 
         def on_message(ws, message, sell_limit=sell_limit, buy_limit=buy_limit):
             candle_data = json.loads(message)
+            print(message)
             closing_rate = float(candle_data['k']['c'])
             if closing_rate >= sell_limit:
                 order("SELL", 100)
