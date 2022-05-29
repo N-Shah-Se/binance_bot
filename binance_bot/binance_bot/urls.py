@@ -20,4 +20,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('user/',include('user_account.urls')),
     path('bot/',include('bot_app.urls')),
+    path('manual_trading/', include('manual_trading.urls'))
 ]

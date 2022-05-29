@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Active Bot User's list</h2>
+
+<ul>
+  {% for user in bot_users %}
+  <li><a href="{% url 'start_manual' %}">{{user.user.email}}</a></li>
+  <li>Dummy bot1</li>
+  <li>Dummy bot2</li>
+  <h1></h1>
+  {% endfor %}
+</ul>  
+
+</body>
+</html>
