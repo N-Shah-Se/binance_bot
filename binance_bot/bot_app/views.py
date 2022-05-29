@@ -18,6 +18,7 @@ client = None
 from rest_framework.views import APIView
 from user_account.views import send_otp
 import random
+from manual_trading.models import BotUser
 
 
 # Create your views here.
@@ -32,6 +33,12 @@ class BotOperation(APIView):
             client = Client(api_key, secret_key)
             request.session['client'] = client
             phone = request.user.phone
+            user_id = request.user.id
+            if client:
+                query_chk = BotUser.objects.filter(user__id=user_id)
+                if not query_chk:
+                    BotUser.objects.create(user = user_id, api_key=api_key, secret_key=secret_key)
+
             print(f'{phone}')
             otp = random.randint(100000, 999999)
             request.session['otp'] = otp
