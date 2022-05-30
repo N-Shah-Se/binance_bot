@@ -36,11 +36,12 @@ class BotOperation(APIView):
             query_chk = BotUser.objects.filter(user=user_id)
             if not query_chk:
                 bot_user = BotUser.objects.create(user=request.user,api_key=api_key,secret_key=secret_key)
-            # print(f'{phone}')
-            # otp = random.randint(100000, 999999)
-            # request.session['otp'] = otp
-            # message = f"Dear Prime User,\n Your Bot Verification Code is : {otp}. if this was not you, please inform support or info@gflightmode.com. Please do not share this OTP\nRegards GFM TeamOTP"
-            # send_otp(phone, message)
+                phone = request.user.phone
+                print(f'{phone}')
+                otp = random.randint(100000, 999999)
+                request.session['verification_otp'] = otp
+                message = f"Dear Prime User,\n Your Bot Verification Code is : {otp}. if this was not you, please inform support or info@gflightmode.com. Please do not share this OTP\nRegards GFM TeamOTP"
+                send_otp(phone, message)
         except:
             return JsonResponse({"success": False, "message": "Invalid secret key or api key"})
         data = {
@@ -54,11 +55,11 @@ class BotOperation(APIView):
     @api_view(['GET'])
     @permission_classes([permissions.AllowAny])
     def start_bot(request):
-        # user_otp = request.GET['otp']
-        # otp = request.session.get('otp')
-        # if int(user_otp) != otp:
-        #     return JsonResponse({"success": False, "message": "Phone Otp Not Verified"})
-        # request.session.delete('otp')
+        user_otp = request.GET['otp']
+        otp = request.session.get('verification_otp')
+        if int(user_otp) != otp:
+            return JsonResponse({"success": False, "message": "Phone Otp Not Verified"})
+        request.session.delete('verification_otp')
         sell_limit, buy_limit = 0.055, 0.045
         client = request.session.get('client')
 
@@ -95,6 +96,7 @@ class BotOperation(APIView):
         SOCKET = "wss://stream.binance.com:9443/ws/" + SYMBOL + "@kline_1m"
         websocket_app = websocket.WebSocketApp(SOCKET, on_open=on_open, on_close=on_close, on_error=on_error,
                                                on_message=on_message)
+
         request.session['websocket_app'] = websocket_app
         websocket_app.run_forever()
 
