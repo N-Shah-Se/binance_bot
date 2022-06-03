@@ -7,11 +7,27 @@
 <ul>
   {% for user in bot_users %}
   <li><a href="{% url 'start_manual' %}">{{user.user.email}}</a></li>
-  <li>Dummy bot1</li>
-  <li>Dummy bot2</li>
-  <h1></h1>
   {% endfor %}
-</ul>  
+</ul>
 
 </body>
+<script>
+function customer_order_details(){
+   var username = jQuery('#email_id').text();
+   console.log(username);
+    jQuery.ajax({
+        type: 'GET',
+        url: '/manual_trading',
+        data: {
+            'email_id':username
+        },
+        success: function(res){
+            // alert('success');
+            location.href = `${res.url}`;
+        }
+    });
+}
+
+</script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 </html>

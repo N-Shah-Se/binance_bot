@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<!-- <html> -->
+<body>
+
+<h2>Buy and Sell(All Prices list)</h2>
+
+  <table>
+  <tr>
+    <th>Symbol</th>
+    <th>Price</th>
+  </tr>
+  {% for price in data %}
+  <tr>
+    <td>{{price.symbol}}</td>
+    <td>{{price.price}}</td>
+  </tr>
+  {% endfor %}
+</table>
+</body>
+
+</html>
