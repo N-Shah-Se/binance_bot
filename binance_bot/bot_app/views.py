@@ -44,13 +44,10 @@ class BotOperation(APIView):
                 send_otp(phone, message)
         except:
             return JsonResponse({"success": False, "message": "Invalid secret key or api key"})
-<<<<<<< HEAD
+
         if query_chk:
             return JsonResponse({"success":True,"message":"Bot is already Started"})
-=======
 
-
->>>>>>> 1c48d3fc18fcc1d223f91b12d9129ba67acf6b52
         data = {
             'email': request.user.email,
             'phone': request.user.phone,
