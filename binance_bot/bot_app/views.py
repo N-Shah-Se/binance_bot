@@ -44,6 +44,8 @@ class BotOperation(APIView):
                 send_otp(phone, message)
         except:
             return JsonResponse({"success": False, "message": "Invalid secret key or api key"})
+
+
         data = {
             'email': request.user.email,
             'phone': request.user.phone,
