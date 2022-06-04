@@ -32,29 +32,45 @@ class BotOperation(APIView):
         try:
             client = Client(api_key, secret_key)
             request.session['client'] = client
-            user_id = request.user.id
-            query_chk = BotUser.objects.filter(user=user_id)
-            if not query_chk:
-                bot_user = BotUser.objects.create(user=request.user,api_key=api_key,secret_key=secret_key)
-                phone = request.user.phone
-                print(f'{phone}')
-                otp = random.randint(100000, 999999)
-                request.session['verification_otp'] = otp
-                message = f"Dear Prime User,\n Your Bot Verification Code is : {otp}. if this was not you, please inform support or info@gflightmode.com. Please do not share this OTP\nRegards GFM TeamOTP"
-                send_otp(phone, message)
+            request.session['api_key'] = api_key
+            request.session['secret_key'] = secret_key
+            # user = request.user
+            # query_chk = BotUser.objects.filter(user=user)
+            # if not query_chk:
+            #     bot_user = BotUser.objects.create(user=request.user,api_key=api_key,secret_key=secret_key)
+
         except:
             return JsonResponse({"success": False, "message": "Invalid secret key or api key"})
 
+<<<<<<< HEAD
         if query_chk:
             return JsonResponse({"success":True,"message":"Bot is already Started"})
 
+=======
+        phone = request.user.phone
+        print(f'{phone}')
+        otp = random.randint(100000, 999999)
+        request.session['verification_otp'] = otp
+        message = f"Dear Prime User,\n Your Bot Verification Code is : {otp}. if this was not you, please inform support or info@gflightmode.com. Please do not share this OTP\nRegards GFM TeamOTP"
+        send_otp(phone, message)
+
+        # if query_chk:
+        #     query_chk = BotUser.objects.get(user=user)
+        #     data = {
+        #         'email': request.user.email,
+        #         'phone': request.user.phone,
+        #         'api_key': query_chk.api_key,
+        #         'secret_key': query_chk.secret_key
+        #     }
+        #     return JsonResponse({"success":True,"data":data})
+>>>>>>> 343ade1b29795408eb38102003c61333d7fd54e7
         data = {
             'email': request.user.email,
             'phone': request.user.phone,
             'api_key': api_key,
             'secret_key': secret_key
         }
-        return JsonResponse({"success": True, "message": data})
+        return JsonResponse({"success": True, "message": "The OTP has been sent to your registered mobile number.","data":data})
 
     @api_view(['GET'])
     @permission_classes([permissions.AllowAny])
@@ -63,6 +79,22 @@ class BotOperation(APIView):
         otp = request.session.get('verification_otp')
         if int(user_otp) != otp:
             return JsonResponse({"success": False, "message": "Phone Otp Not Verified"})
+        user = request.user
+        query_chk = BotUser.objects.filter(user=user)
+        api_key = request.session.get('api_key')
+        secret_key = request.session.get('secret_key')
+        if not query_chk:
+            bot_user = BotUser.objects.create(user=request.user, api_key=api_key, secret_key=secret_key)
+        else:
+            if query_chk:
+                query_chk = BotUser.objects.get(user=user)
+                data = {
+                    'email': request.user.email,
+                    'phone': request.user.phone,
+                    'api_key': query_chk.api_key,
+                    'secret_key': query_chk.secret_key
+                }
+                return JsonResponse({"success":True,"data":data})
         request.session.delete('verification_otp')
         sell_limit, buy_limit = 0.055, 0.045
         client = request.session.get('client')
