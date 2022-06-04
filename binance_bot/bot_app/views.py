@@ -44,7 +44,8 @@ class BotOperation(APIView):
 
         except:
             return JsonResponse({"success": False, "message": "Invalid secret key or api key"})
-
+        if response_ ==False:
+            return JsonResponse({"success": False, "message": "Invalid APi KEY and Secret Key"})
         phone = request.user.phone
         print(f'{phone}')
         otp = random.randint(100000, 999999)
