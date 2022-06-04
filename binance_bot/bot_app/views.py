@@ -42,11 +42,6 @@ class BotOperation(APIView):
         except:
             return JsonResponse({"success": False, "message": "Invalid secret key or api key"})
 
-<<<<<<< HEAD
-        if query_chk:
-            return JsonResponse({"success":True,"message":"Bot is already Started"})
-
-=======
         phone = request.user.phone
         print(f'{phone}')
         otp = random.randint(100000, 999999)
@@ -62,8 +57,7 @@ class BotOperation(APIView):
         #         'api_key': query_chk.api_key,
         #         'secret_key': query_chk.secret_key
         #     }
-        #     return JsonResponse({"success":True,"data":data})
->>>>>>> 343ade1b29795408eb38102003c61333d7fd54e7
+        #     return JsonResponse({"success":True,"data":data}
         data = {
             'email': request.user.email,
             'phone': request.user.phone,
