@@ -30,10 +30,13 @@ class BotOperation(APIView):
         api_key = request.data['api_key']
         secret_key = request.data['secret_key']
         try:
-            client = Client(api_key, secret_key)
-            request.session['client'] = client
-            request.session['api_key'] = api_key
-            request.session['secret_key'] = secret_key
+            url = 'https://api.binance.com/api/v1/userDataStream'
+            response_ = requests.post(url, headers={'X-MBX-APIKEY': api_key})  # ['listenKey']
+            if response_:
+                client = Client(api_key, secret_key)
+                request.session['client'] = client
+                request.session['api_key'] = api_key
+                request.session['secret_key'] = secret_key
             # user = request.user
             # query_chk = BotUser.objects.filter(user=user)
             # if not query_chk:
