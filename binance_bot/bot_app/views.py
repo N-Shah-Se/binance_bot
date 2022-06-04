@@ -44,7 +44,8 @@ class BotOperation(APIView):
 
         except:
             return JsonResponse({"success": False, "message": "Invalid secret key or api key"})
-
+        if response_ ==False:
+            return JsonResponse({"success": False, "message": "Invalid APi KEY and Secret Key"})
         phone = request.user.phone
         print(f'{phone}')
         otp = random.randint(100000, 999999)
@@ -74,24 +75,25 @@ class BotOperation(APIView):
     def start_bot(request):
         user_otp = request.GET['otp']
         otp = request.session.get('verification_otp')
+
         if int(user_otp) != otp:
-            return JsonResponse({"success": False, "message": "Phone Otp Not Verified"})
+            return JsonResponse({"success": False, "message": "Entered Otp is invalid"})
         user = request.user
         query_chk = BotUser.objects.filter(user=user)
         api_key = request.session.get('api_key')
         secret_key = request.session.get('secret_key')
         if not query_chk:
             bot_user = BotUser.objects.create(user=request.user, api_key=api_key, secret_key=secret_key)
-        else:
-            if query_chk:
-                query_chk = BotUser.objects.get(user=user)
-                data = {
-                    'email': request.user.email,
-                    'phone': request.user.phone,
-                    'api_key': query_chk.api_key,
-                    'secret_key': query_chk.secret_key
-                }
-                return JsonResponse({"success":True,"data":data})
+        # else:
+        #     if query_chk:
+        #         query_chk = BotUser.objects.get(user=user)
+        #         data = {
+        #             'email': request.user.email,
+        #             'phone': request.user.phone,
+        #             'api_key': query_chk.api_key,
+        #             'secret_key': query_chk.secret_key
+        #         }
+        #         return JsonResponse({"success":True,"data":data})
         request.session.delete('verification_otp')
         request.session.delete('api_key')
         request.session.delete('secret_key')
