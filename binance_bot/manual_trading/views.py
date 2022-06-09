@@ -14,6 +14,7 @@ from rest_framework.views import APIView
 from rest_framework.decorators import permission_classes
 from manual_trading.models import BotUser
 from django.contrib.auth.decorators import login_required
+from binance.enums import *
 
 class ManualOperation(APIView):
 
@@ -40,28 +41,39 @@ class ManualOperation(APIView):
 	   # minQty = request.GET['minQty']
 	   # maxQty = request.GET['maxQty']
 	    operation = request.GET['operation']
-	    price = request.GET['price']
-	    quantity = request.GET['quantity']
-	    client = Client(api_key, secret_key)
-	    request.session['client'] = client
-	    buy_limit=""
+	   # price = request.GET['price']
+	   # quantity = request.GET['quantity']
+	    quantity=100
+	    price=0.1000
 	    try:
-	        if operation == 'BUY':
-	            info = client.futures_exchange_info() # request info on all futures symbols
-	            symbols_n_precision = {}
-	            for item in info['symbols']:
-	                if item['symbol'] == currency:
-	                    symbols_n_precision[item['symbol']] = item['quantityPrecision'] # not really necessary but here we are...
-	            trade_size_in_dollars = quantity
-	            # For example
-	            order_amount = float(trade_size_in_dollars) / float(price) # size of order in BTC
-	            precision = symbols_n_precision[currency]
-	            precise_order_amount = "{:0.0{}f}".format(order_amount, precision)
-	            buy_limit=client.create_order(symbol=currency, side='BUY', type='MARKET',timeInForce='GTC', quantity=quantity,price=price)
-	           # buy_limit=client.futures_create_order(symbol=currency, side='BUY', type='MARKET', quantity=precise_order_amount)
-	           # buy_limit = client.create_test_order(symbol=currency,side='SELL',type='LIMIT',quantity=100,timeInForce='GTC',price=price)
-	        elif operation == 'SELL':
-	            buy_limit = client.create_order(symbol=currency,side='SELL',type='LIMIT',timeInForce='GTC',price=amount)
+	        client = Client(api_key, secret_key)
+	        request.session['client'] = client
+	        buy_limit = client.create_order(
+            symbol=currency,
+            side=SIDE_BUY,
+            type=ORDER_TYPE_LIMIT,
+            timeInForce=TIME_IN_FORCE_GTC,
+            quantity=quantity,
+            price=str(price)
+            )
+
+	   # try:
+	   #     if operation == 'BUY':
+	   #         info = client.futures_exchange_info() # request info on all futures symbols
+	   #         symbols_n_precision = {}
+	   #         for item in info['symbols']:
+	   #             if item['symbol'] == currency:
+	   #                 symbols_n_precision[item['symbol']] = item['quantityPrecision'] # not really necessary but here we are...
+	   #         trade_size_in_dollars = quantity
+	   #         # For example
+	   #         order_amount = float(trade_size_in_dollars) / float(price) # size of order in BTC
+	   #         precision = symbols_n_precision[currency]
+	   #         precise_order_amount = "{:0.0{}f}".format(order_amount, precision)
+	   #         buy_limit=client.create_order(symbol=currency, side='BUY', type='MARKET',timeInForce='GTC', quantity=quantity,price=price)
+	   #        # buy_limit=client.futures_create_order(symbol=currency, side='BUY', type='MARKET', quantity=precise_order_amount)
+	   #        # buy_limit = client.create_test_order(symbol=currency,side='SELL',type='LIMIT',quantity=100,timeInForce='GTC',price=price)
+	       # elif operation == 'SELL':
+	       #     buy_limit = client.create_order(symbol=currency,side='SELL',type='LIMIT',timeInForce='GTC',price=amount)
 	    except BinanceAPIException as e:
 	        return JsonResponse({"status":False,"message":f"{e}"})
 	    except BinanceOrderException as e:

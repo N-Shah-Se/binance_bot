@@ -112,24 +112,43 @@ class BotOperation(APIView):
             print("error")
             return JsonResponse({"msg": f"{error}"})
 
-        def order(side, quantity, symbol="FORUSDT"):
+        def order(request,side, quantity,price, symbol):
             try:
-                order_ = client.create_order(symbol=symbol, side=side, type=client.ORDER_TYPE_MARKET, quantity=quantity)
-                print(order_)
+                # order_ = client.create_order(symbol=symbol, side=side, type=client.ORDER_TYPE_MARKET, quantity=quantity)
+                # quantity=
+                # price=0.1000
+                client = request.session.get('client')
+                buy_limit = client.create_order(
+                symbol=symbol,
+                side=SIDE_BUY,
+                type=ORDER_TYPE_LIMIT,
+                timeInForce=TIME_IN_FORCE_GTC,
+                quantity=quantity,
+                price=str(price)
+                )
+                request.session['buy_limit'] = buy_limit
             except BinanceAPIException as ex:
                 print(f"{ex}")
                 return JsonResponse({"Failure": f"{ex}"})
             print("oderrrr placed")
             return JsonResponse({"msg": f"{order_}"})
-
-        def on_message(ws, message, sell_limit=sell_limit, buy_limit=buy_limit):
+        def cancel_order():
+            client = request.session.get('client')
+            buy_limit = request.session.get('buy_limit')
+            order_cancel = client.cancel_order(symbol=currency,orderId=buy_limit['orderId'])
+            print(order_cancel)
+        def on_message(ws,request, message, sell_limit=sell_limit, buy_limit=buy_limit):
             candle_data = json.loads(message)
             print(message)
             closing_rate = float(candle_data['k']['c'])
-            if closing_rate >= sell_limit:
-                order("SELL", 100)
-            elif closing_rate <= buy_limit:
-                order("BUY", 100)
+            symbol="XRPUSDT"
+            order("BUY",100,0.1000,symbol)
+            sleep(30)
+            cancel_order(symbol)
+            # if closing_rate >= sell_limit:
+            #     order("SELL", 100)
+            # elif closing_rate <= buy_limit:
+            #     order("BUY", 100)
         SYMBOL = 'forusdt'
         SOCKET = "wss://stream.binance.com:9443/ws/" + SYMBOL + "@kline_1m"
         websocket_app = websocket.WebSocketApp(SOCKET, on_open=on_open, on_close=on_close, on_error=on_error,
