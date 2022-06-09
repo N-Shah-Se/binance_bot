@@ -1,3 +1,4 @@
+from django.contrib.auth.models import PermissionsMixin
 from django.db import models
 from django.core.validators import RegexValidator
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
@@ -48,9 +49,14 @@ class UserAccountManager(BaseUserManager):
         user.staff = True
         user.save(using=self._db)
         return user
+    def has_perm(self, perm, obj=None):
+        return self.is_admin
+
+    def has_module_perms(self, app_label):
+        return self.is_admin
 
 
-class Profile(AbstractBaseUser):
+class Profile(AbstractBaseUser,PermissionsMixin):
     password = models.CharField(max_length=150)
     phone = models.CharField(max_length=17,validators=[phone_regex],unique=True)
     email = models.EmailField(max_length=100,unique=True)
@@ -59,7 +65,7 @@ class Profile(AbstractBaseUser):
     is_active = models.BooleanField(default=True)
     staff = models.BooleanField(default=False) # a admin user; non super-user
     admin = models.BooleanField(default=False) # a superuser
-
+    is_superuser = models.BooleanField(default=True)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['phone']
 
@@ -102,7 +108,7 @@ class Profile(AbstractBaseUser):
     def is_admin(self):
         "Is the user a admin member?"
         return self.admin
-    
+
 
     def get_full_name(self):
         # The user is identified by their email address
@@ -110,7 +116,7 @@ class Profile(AbstractBaseUser):
 
     def get_short_name(self):
         # The user is identified by their email address
-        return self.email        
+        return self.email
 
     def __str__(self):
         return self.email
