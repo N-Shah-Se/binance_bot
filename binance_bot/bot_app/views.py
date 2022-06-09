@@ -61,12 +61,13 @@ class BotOperation(APIView):
         #         'api_key': query_chk.api_key,
         #         'secret_key': query_chk.secret_key
         #     }
-        #     return JsonResponse({"success":True,"data":data})
+        #     return JsonResponse({"success":True,"data":data}
         data = {
             'email': request.user.email,
             'phone': request.user.phone,
             'api_key': api_key,
-            'secret_key': secret_key
+            'secret_key': secret_key,
+            'otp':otp
         }
         return JsonResponse({"success": True, "message": "The OTP has been sent to your registered mobile number.","data":data})
 
@@ -77,7 +78,7 @@ class BotOperation(APIView):
         otp = request.session.get('verification_otp')
 
         if int(user_otp) != otp:
-            return JsonResponse({"success": False, "message": "Entered Otp is invalid"})
+            return JsonResponse({"status": False, "message": "Entered Otp is invalid"})
         user = request.user
         query_chk = BotUser.objects.filter(user=user)
         api_key = request.session.get('api_key')
@@ -95,6 +96,8 @@ class BotOperation(APIView):
         #         }
         #         return JsonResponse({"success":True,"data":data})
         request.session.delete('verification_otp')
+        request.session.delete('api_key')
+        request.session.delete('secret_key')
         sell_limit, buy_limit = 0.055, 0.045
         client = request.session.get('client')
 
