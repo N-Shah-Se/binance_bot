@@ -19,7 +19,7 @@ from rest_framework.views import APIView
 from user_account.views import send_otp
 import random
 from manual_trading.models import BotUser
-
+from binance.enums import *
 
 # Create your views here.
 
@@ -98,7 +98,7 @@ class BotOperation(APIView):
         request.session.delete('verification_otp')
         request.session.delete('api_key')
         request.session.delete('secret_key')
-        sell_limit, buy_limit = 0.055, 0.045
+        sell_limit, buy_limit = "", ""
         client = request.session.get('client')
 
         def on_open(ws):
@@ -112,12 +112,12 @@ class BotOperation(APIView):
             print("error")
             return JsonResponse({"msg": f"{error}"})
 
-        def order(request,side, quantity,price, symbol):
+        def order(side, quantity,price, symbol):
             try:
                 # order_ = client.create_order(symbol=symbol, side=side, type=client.ORDER_TYPE_MARKET, quantity=quantity)
                 # quantity=
                 # price=0.1000
-                client = request.session.get('client')
+                # client = request.session.get('client')
                 buy_limit = client.create_order(
                 symbol=symbol,
                 side=SIDE_BUY,
@@ -126,30 +126,30 @@ class BotOperation(APIView):
                 quantity=quantity,
                 price=str(price)
                 )
-                request.session['buy_limit'] = buy_limit
+                # request.session['buy_limit'] = buy_limit
             except BinanceAPIException as ex:
                 print(f"{ex}")
                 return JsonResponse({"Failure": f"{ex}"})
             print("oderrrr placed")
-            return JsonResponse({"msg": f"{order_}"})
+            return JsonResponse({"msg": f"{buy_limit}"})
         def cancel_order():
-            client = request.session.get('client')
-            buy_limit = request.session.get('buy_limit')
+            # client = request.session.get('client')
+            # buy_limit = request.session.get('buy_limit')
             order_cancel = client.cancel_order(symbol=currency,orderId=buy_limit['orderId'])
             print(order_cancel)
-        def on_message(ws,request, message, sell_limit=sell_limit, buy_limit=buy_limit):
+        def on_message(ws,message, sell_limit=sell_limit, buy_limit=buy_limit):
             candle_data = json.loads(message)
             print(message)
             closing_rate = float(candle_data['k']['c'])
             symbol="XRPUSDT"
             order("BUY",100,0.1000,symbol)
-            sleep(30)
-            cancel_order(symbol)
+            # sleep(30)
+            # cancel_order(symbol)
             # if closing_rate >= sell_limit:
             #     order("SELL", 100)
             # elif closing_rate <= buy_limit:
             #     order("BUY", 100)
-        SYMBOL = 'forusdt'
+        SYMBOL = 'xrpusdt'
         SOCKET = "wss://stream.binance.com:9443/ws/" + SYMBOL + "@kline_1m"
         websocket_app = websocket.WebSocketApp(SOCKET, on_open=on_open, on_close=on_close, on_error=on_error,
                                                on_message=on_message)
