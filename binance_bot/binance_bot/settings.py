@@ -150,6 +150,13 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 STATIC_URL = '/static/'
 
+# Actual directory user files go to
+MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'media')
+
+# URL used to access the media
+MEDIA_URL = '/media/'
+
+
 # STATICFILES_DIRS = [
 #   os.path.join(BASE_DIR, "static")
 # ]

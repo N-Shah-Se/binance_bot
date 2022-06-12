@@ -1,4 +1,5 @@
 import re
+import os
 from django.shortcuts import render, redirect
 from .models import Profile
 import requests
@@ -215,7 +216,11 @@ class UserRegisteration(APIView):
             if check_password(password, user.password):
                 # user.generate_jwt_token()
                 tokens = user.token
-                data = {"access_tokens": tokens, "email": user.email}
+                if user.image_url:
+                    image_url = f"nshah.pythonanywhere.com/media/{user.image_url}"
+                else:
+                    image_url = None
+                data = {"access_tokens": tokens, "email": user.email,"phone":user.phone,"first_name":user.first_name,"last_name":user.last_name,"username":user.username,"image":f"{image_url}"}
                 return JsonResponse({"data": data, "message": "Successfull Login"})
             else:
                 res = serializers.ValidationError({'message':'Invalid password', 'status_code':'400'})
@@ -256,3 +261,35 @@ class UserRegisteration(APIView):
             res = serializers.ValidationError({'message':'Internal Server Error', 'status_code':'500'})
             # res.status_code = 200
             raise res
+
+    @api_view(['POST'])
+    @permission_classes([permissions.AllowAny])
+    def set_profile(request):
+        username = request.data["username"]
+        first_name = request.data['first_name']
+        last_name = request.data['last_name']
+        file = request.FILES['image']
+        file_name_split = os.path.split(file.name)
+        image_name = file_name_split[0]
+        image_ext = file_name_split[1].split('.')[-1]
+        save_path = request.user.phone+"."+image_ext
+        try:
+            request.data._mutable = True
+            request.FILES['image'].name = save_path
+            request.data._mutable = False
+            user = Profile.objects.get(email=request.user.email)
+            user.image_url = file
+            user.username = username
+            user.first_name = first_name
+            user.last_name = last_name
+            user.save()
+        except Exception as e:
+            res = serializers.ValidationError({'message':f'{e}', 'status_code':'500'})
+            # res.status_code = 200
+            raise res
+        user = Profile.objects.get(email=request.user.email)
+        data = {"first_name":user.first_name,"last_name":user.last_name,"username":user.username,"image":f"nshah.pythonanywhere.com/media/{user.image_url}"}
+        return JsonResponse({"success":True , "data": data})
+
+
+

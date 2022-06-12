@@ -79,12 +79,12 @@ class BotOperation(APIView):
 
         if int(user_otp) != otp:
             return JsonResponse({"status": False, "message": "Entered Otp is invalid"})
-        user = request.user
+        user = request.user.email
         query_chk = BotUser.objects.filter(user=user)
         api_key = request.session.get('api_key')
         secret_key = request.session.get('secret_key')
         if not query_chk:
-            bot_user = BotUser.objects.create(user=request.user, api_key=api_key, secret_key=secret_key)
+            bot_user = BotUser.objects.create(user=request.user.email, api_key=api_key, secret_key=secret_key)
         # else:
         #     if query_chk:
         #         query_chk = BotUser.objects.get(user=user)
