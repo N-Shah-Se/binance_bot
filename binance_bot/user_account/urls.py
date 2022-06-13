@@ -18,4 +18,5 @@ urlpatterns = [
     path('add_user/',UserRegisteration.add_user),
     path('login_user/',UserRegisteration.userLogin),
     path('change_password/',UserRegisteration.change_password),
+    path('set_profile/',UserRegisteration.set_profile),
 ]

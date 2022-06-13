@@ -22,7 +22,7 @@ class ManualOperation(APIView):
 	@permission_classes([permissions.AllowAny])
 	def get_credentials(request):
 		try:
-			query_chk = BotUser.objects.get(user=request.user)
+			query_chk = BotUser.objects.get(user=request.user.email)
 		except:
 			return JsonResponse({"success": False, "message": "User API key and Secret Key is not availabel"})
 

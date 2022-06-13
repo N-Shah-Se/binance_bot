@@ -65,7 +65,11 @@ class Profile(AbstractBaseUser,PermissionsMixin):
     is_active = models.BooleanField(default=True)
     staff = models.BooleanField(default=False) # a admin user; non super-user
     admin = models.BooleanField(default=False) # a superuser
-    is_superuser = models.BooleanField(default=True)
+    is_superuser = models.BooleanField(default=False)
+    first_name = models.CharField(max_length=100, null= True,default=None)
+    last_name = models.CharField(max_length=100, null=True,default=None)
+    image_url = models.ImageField(upload_to='images/',max_length=200,default=None)
+    username = models.CharField(max_length=200, null=True,default=None)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['phone']
 
