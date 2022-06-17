@@ -132,8 +132,10 @@ class UserRegisteration(APIView):
         email = request.session.get('email_otp')
         phone = request.session.get('otp')
         # #        otp = request.session['email_otp']
-        if int(email_otp) == email and int(phone_otp) == phone:
-            pass
+        code_exist = Profile.objects.filter(invitation_code=invitation_code)
+        if invitation_code != "GFM2803" or code_exist==False:
+            res = serializers.ValidationError({'message':'Invalud Invitation Code', 'status_code':'400'})
+            raise res
         elif int(email_otp) != email:
             # return JsonResponse({"success": False, "message": "Email Otp Not Verified"})
             res = serializers.ValidationError({'message':'Email OTP not verified', 'status_code':'400'})

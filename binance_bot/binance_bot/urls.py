@@ -22,5 +22,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('user/',include('user_account.urls')),
     path('bot/',include('bot_app.urls')),
-    path('manual_trading/', include('manual_trading.urls'))
+    path('manual_trading/', include('manual_trading.urls')),
+    path('kyc/', include('kyc_app.urls'))
 ] +  static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

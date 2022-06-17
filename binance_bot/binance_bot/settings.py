@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'bot_app',
     'manual_trading',
+    'kyc_app',
 ]
 
 MIDDLEWARE = [
