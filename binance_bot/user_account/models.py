@@ -56,12 +56,12 @@ class UserAccountManager(BaseUserManager):
         return self.is_admin
 
 
-class Profile(AbstractBaseUser,PermissionsMixin):
+class Account(AbstractBaseUser,PermissionsMixin):
     password = models.CharField(max_length=150)
     phone = models.CharField(max_length=17,validators=[phone_regex],unique=True)
     email = models.EmailField(max_length=100,unique=True)
     invitation_code = models.CharField(max_length=20)
-    account_created = models.DateTimeField(default=datetime.now())
+    account_created = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
     staff = models.BooleanField(default=False) # a admin user; non super-user
     admin = models.BooleanField(default=False) # a superuser
@@ -122,8 +122,6 @@ class Profile(AbstractBaseUser,PermissionsMixin):
         # The user is identified by their email address
         return self.email
 
-    def __str__(self):
-        return self.email
 
     def has_perm(self, perm, obj=None):
         "Does the user have a specific permission?"

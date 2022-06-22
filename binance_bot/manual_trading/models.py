@@ -1,5 +1,5 @@
 from django.db import models
-from user_account.models import Profile
+from user_account.models import Account
 # Create your models here.
 
 class BotUser(models.Model):

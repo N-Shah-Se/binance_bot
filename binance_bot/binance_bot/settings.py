@@ -45,6 +45,7 @@ SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
 
 INSTALLED_APPS = [
     'jazzmin',
+    'django_extensions',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -57,6 +58,7 @@ INSTALLED_APPS = [
     'bot_app',
     'manual_trading',
     'kyc_app',
+    'discount',
 ]
 
 MIDDLEWARE = [
@@ -235,4 +237,4 @@ REST_FRAMEWORK = {
     ),
 }
 
-AUTH_USER_MODEL= 'user_account.Profile'
+AUTH_USER_MODEL= 'user_account.Account'

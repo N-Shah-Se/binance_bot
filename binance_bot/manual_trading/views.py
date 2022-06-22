@@ -13,7 +13,6 @@ from rest_framework import response, permissions
 from rest_framework.views import APIView
 from rest_framework.decorators import permission_classes
 from manual_trading.models import BotUser
-from django.contrib.auth.decorators import login_required
 from binance.enums import *
 
 class ManualOperation(APIView):

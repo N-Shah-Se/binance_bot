@@ -1,4 +1,4 @@
-from .models import Profile
+from .models import Account
 
 from rest_framework.generics import RetrieveAPIView
 from rest_framework.response import Response

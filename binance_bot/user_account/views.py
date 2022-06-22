@@ -1,7 +1,7 @@
 import re
 import os
 from django.shortcuts import render, redirect
-from .models import Profile
+from .models import Account
 import requests
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.hashers import check_password
@@ -132,7 +132,7 @@ class UserRegisteration(APIView):
         email = request.session.get('email_otp')
         phone = request.session.get('otp')
         # #        otp = request.session['email_otp']
-        code_exist = Profile.objects.filter(invitation_code=invitation_code)
+        code_exist = Account.objects.filter(invitation_code=invitation_code)
         if invitation_code != "GFM2803" or code_exist==False:
             res = serializers.ValidationError({'message':'Invalud Invitation Code', 'status_code':'400'})
             raise res
@@ -149,8 +149,8 @@ class UserRegisteration(APIView):
         phone = request.session.get('phone')
 
         # hash_pwd = make_password(password)
-        emails = Profile.objects.filter(email=email_otp)
-        phone_no = Profile.objects.filter(phone=phone_otp)
+        emails = Account.objects.filter(email=email_otp)
+        phone_no = Account.objects.filter(phone=phone_otp)
         account_exist = False
         if emails:
             account_exist = True
@@ -166,7 +166,7 @@ class UserRegisteration(APIView):
             # password = request.data['password']
             # request.session.delete('email_otp')
             # request.session.delete('phone_otp')
-            Profile.objects.create_user(
+            Account.objects.create_user(
                 email=email,
                 phone=phone,
                 invitation_code=invitation_code,
@@ -194,7 +194,7 @@ class UserRegisteration(APIView):
                 # res.status_code = 200
                 raise res
             try:
-                user = Profile.objects.get(email=operation)
+                user = Account.objects.get(email=operation)
             except:
                 # return JsonResponse({"success": False, "message": "User Record Not Found"})
                 res = serializers.ValidationError({'message':'User not exists, please signup first.', 'status_code':'400'})
@@ -208,7 +208,7 @@ class UserRegisteration(APIView):
                 raise res
                 # return JsonResponse({"success": False, "message": "Phone Otp Not Verified"})
             try:
-                user = Profile.objects.get(phone=operation)
+                user = Account.objects.get(phone=operation)
             except:
                 # return JsonResponse({"success": False, "message": "User Record Not Found"})
                 res = serializers.ValidationError({'message':'User not exists, please signup first.', 'status_code':'400'})
@@ -249,7 +249,7 @@ class UserRegisteration(APIView):
         email = request.session.get('email')
         phone = request.session.get('phone')
 
-        user = Profile.objects.filter(email=email).filter(phone=phone)
+        user = Account.objects.filter(email=email).filter(phone=phone)
         user.update(password=make_password(password))
         if user:
             if status.HTTP_200_OK:
@@ -279,7 +279,7 @@ class UserRegisteration(APIView):
             request.data._mutable = True
             request.FILES['image'].name = save_path
             request.data._mutable = False
-            user = Profile.objects.get(email=request.user.email)
+            user = Account.objects.get(email=request.user.email)
             user.image_url = file
             user.username = username
             user.first_name = first_name
@@ -289,7 +289,7 @@ class UserRegisteration(APIView):
             res = serializers.ValidationError({'message':f'{e}', 'status_code':'500'})
             # res.status_code = 200
             raise res
-        user = Profile.objects.get(email=request.user.email)
+        user = Account.objects.get(email=request.user.email)
         data = {"first_name":user.first_name,"last_name":user.last_name,"username":user.username,"image":f"nshah.pythonanywhere.com/media/{user.image_url}"}
         return JsonResponse({"success":True , "data": data})
 

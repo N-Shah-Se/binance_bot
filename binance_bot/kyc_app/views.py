@@ -32,29 +32,29 @@ class KycUser(APIView):
             pin_code = request.data['pin_code']
             cnic = request.data['cnic']
             ### front image
-            file = request.FILES['cnic_front']
-            file_name_split = os.path.split(file.name)
+            cnic_front = request.FILES['cnic_front']
+            file_name_split = os.path.split(cnic_front.name)
             image_ext = file_name_split[1].split('.')[-1]
-            cnic_front = request.user.phone+'_front_'+"."+image_ext
+            cnic_front_img = request.user.phone+"."+image_ext
             request.data._mutable = True
-            request.FILES['cnic_front'].name = cnic_front
+            request.FILES['cnic_front'].name = cnic_front_img
             request.data._mutable = False
             ###### back image
-            file = request.FILES['cnic_back']
-            file_name_split = os.path.split(file.name)
+            cnic_back = request.FILES['cnic_back']
+            file_name_split = os.path.split(cnic_back.name)
             image_ext = file_name_split[1].split('.')[-1]
-            cnic_back = request.user.phone+'_front_'+"."+image_ext
+            cnic_back_img = request.user.phone+"."+image_ext
             request.data._mutable = True
-            request.FILES['cnic_back'].name = cnic_back
+            request.FILES['cnic_back'].name = cnic_back_img
             request.data._mutable = False
             #### Card image
             card_no = request.data['card_no']
-            file = request.FILES['card_image']
-            file_name_split = os.path.split(file.name)
+            card_image = request.FILES['card_image']
+            file_name_split = os.path.split(card_image.name)
             image_ext = file_name_split[1].split('.')[-1]
-            card_image = request.user.phone+'_front_'+"."+image_ext
+            card_img = request.user.phone+"."+image_ext
             request.data._mutable = True
-            request.FILES['card_image'].name = card_image
+            request.FILES['card_image'].name = card_img
             request.data._mutable = False
             account_no = request.data['account_no']
             account_holder = request.data['account_holder']
