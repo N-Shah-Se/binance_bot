@@ -34,7 +34,7 @@ class price_info:
 
 class BotOperation(APIView):
     @api_view(['POST'])
-    @permission_classes([permissions.AllowAny])
+    # @permission_classes([permissions.AllowAny])
     def check_credentials(request):
         api_key = request.data['api_key']
         secret_key = request.data['secret_key']
@@ -81,36 +81,42 @@ class BotOperation(APIView):
         return JsonResponse({"success": True, "message": "The OTP has been sent to your registered mobile number.","data":data})
 
     @api_view(['GET'])
-    @permission_classes([permissions.AllowAny])
+    # @permission_classes([permissions.AllowAny])
     def start_bot(request):
+        class test_class:
+            client=''
+            bidding=''
+            buy_counter = 0
+            user = ""
         user_otp = request.GET['otp']
-        # otp = request.session.get('verification_otp')
+        otp = request.session.get('verification_otp')
 
-        # if int(user_otp) != otp:
-        #     return JsonResponse({"status": False, "message": "Entered Otp is invalid"})
+        if int(user_otp) != otp:
+            return JsonResponse({"status": False, "message": "Entered Otp is invalid"})
         user = request.user.email
         query_chk = BotUser.objects.filter(user=user)
         api_key = request.session.get('api_key')
-        # secret_key = request.session.get('secret_key')
-        api_key = request.data['api_key']
-        secret_key = request.data['secret_key']
+        secret_key = request.session.get('secret_key')
+        # api_key = request.data['api_key']
+        # secret_key = request.data['secret_key']
         if not query_chk:
-            bot_user = BotUser.objects.create(user=request.user.email, api_key=api_key, secret_key=secret_key)
-        # else:
-        #     if query_chk:
-        #         query_chk = BotUser.objects.get(user=user)
-        #         data = {
-        #             'email': request.user.email,
-        #             'phone': request.user.phone,
-        #             'api_key': query_chk.api_key,
-        #             'secret_key': query_chk.secret_key
-        #         }
-        #         return JsonResponse({"success":True,"data":data})
-        # request.session.delete('verification_otp')
-        # request.session.delete('api_key')
-        # request.session.delete('secret_key')
+            BotUser.objects.create(user=request.user.email, api_key=api_key, secret_key=secret_key)
+        else:
+            if query_chk:
+                query_chk = BotUser.objects.get(user=user)
+                data = {
+                    'email': request.user.email,
+                    'phone': request.user.phone,
+                    'api_key': query_chk.api_key,
+                    'secret_key': query_chk.secret_key
+                }
+                return JsonResponse({"success":True,"data":data})
+        request.session.delete('verification_otp')
+        request.session.delete('api_key')
+        request.session.delete('secret_key')
         # sell_limit, buy_limit = "", ""
         client = Client(api_key,secret_key)
+        test_class.client=client
         # client = request.session.get('client')
 
 
@@ -125,15 +131,16 @@ class BotOperation(APIView):
             print("error")
             return JsonResponse({"msg": f"{error}"})
 
-        def order(side, quantity,price, symbol):
+        def place_order(side, quantity,price, symbol):
             try:
                 # order_ = client.create_order(symbol=symbol, side=side, type=client.ORDER_TYPE_MARKET, quantity=quantity)
                 # quantity=
                 # price=0.1000
                 # client = request.session.get('client')
-                quantity=100
-                price=0.100
-                order = client.create_order(
+                # quantity=100
+                # price=0.100
+                # order = test_class.client.create_order(
+                order = test_class.client.create_test_order(
                 symbol=symbol,
                 side=side,
                 type=ORDER_TYPE_LIMIT,
@@ -141,51 +148,61 @@ class BotOperation(APIView):
                 quantity=quantity,
                 price=str(price)
                 )
+                print(order)
                 # request.session['buy_limit'] = buy_limit
             except BinanceAPIException as ex:
                 print(f"{ex}")
-                return JsonResponse({"Failure": f"{ex}"})
+                # return JsonResponse({"Failure": f"{ex}"})
             print("oderrrr placed")
-            return JsonResponse({"msg": f"{order}"})
+            # return JsonResponse({"msg": f"{order}"})
         def cancel_order():
             # client = request.session.get('client')
             # buy_limit = request.session.get('buy_limit')
             order_cancel = client.cancel_order(symbol=currency,orderId=buy_limit['orderId'])
             print(order_cancel)
-        def on_message(ws,message, sell_limit=sell_limit, buy_limit=buy_limit):
-            candle_data = json.loads(message)
-            closing_rate = float(candle_data['k']['c'])
 
-            url = "https://api.binance.com/api/v3/ticker/price?symbol=XRPUSDT"
-            data = requests.get(url)
-            data = data.json()
-            current_price = data['XRPUSDT']
+        def on_message(ws,message, sell_limit=sell_limit, buy_limit=buy_limit):
             symbol="XRPUSDT"
-            order(SIDE_BUY,10,current_price,symbol)
-            on_close(ws)
-            if price_info.bid_price == 0:
-                price_info.bid_price = current_price
-                price_info.order = order(SIDE_BUY,10,current_price,symbol)
-                price_info.buy_counter+=1
-                on_close(ws)
-            # else:
-            #     previous_price = price_info.bid_price
-            #     per1 = (float(previous_price)*1)/100
-            #     per5 = (float(previous_price)*5)/100
-            #     per1_profit = float(previous_price) + per1
-            #     per1_loss = float(previous_price) - per1
-            #     per5_loss = float(previous_price) - per5
-            #     if current_price == per1_profit and buy_counter <= 2:
-            #         print("sell")
-            #         order(SIDE_SELL,10,current_price,symbol)
+            current_price = float(test_class.client.get_symbol_ticker(symbol=symbol)["price"])
+            current_price =float('{:.8f}'.format(current_price))
+            if test_class.bidding == '':
+                test_class.bidding = current_price
+                order = place_order(SIDE_BUY,30,current_price,symbol)
+                # print(order)
+                test_class.buy_counter+=1
+                print(test_class.buy_counter)
+                # print(order)
+                # ws.close()
+            else:
+                previous_price = test_class.bidding
+                per1 = (float(previous_price)*1)/100
+                per1 = float('{:.8f}'.format(per1))
+                per5 = (float(previous_price)*5)/100
+                per5 = float('{:.8f}'.format(per5))
+                per1_profit = float(previous_price) + per1
+                per1_loss = float(previous_price) - per1
+                per5_loss = float(previous_price) - per5
+                if current_price >= per1_profit and test_class.buy_counter <= 2:
+                    print("sell")
+                    # test_class.buy_counter+=1
+                    order = place_order(SIDE_SELL, 29, current_price, symbol)
+                    # order(SIDE_SELL,10,current_price,symbol)
             #         print(f"BidPrice{bid_price}:::current_price{current_price}")
-            #     elif current_price == per1_loss and buy_counter < 2:
-            #         print("buy")
+                elif current_price < per1_loss and test_class.buy_counter <= 3:
+                    print("buy")
+                    test_class.buy_counter+=1
+                    order = place_order(SIDE_BUY, 30, current_price, symbol)
             #         order(SIDE_BUY,10,current_price,symbol)
             #         buy_counter+=1
             #         print(f"BidPrice{bid_price}:::current_price{current_price}")
-            #     elif current_price == per5_loss and buy_counter < 2:
-            #         print("buy")
+                elif current_price < per5_loss and test_class.buy_counter <= 3:
+                    print("buy")
+                    test_class.buy_counter += 1
+                    order = place_order(SIDE_BUY, 30, current_price, symbol)
+                # elif test_class.buy_counter ==2:
+                #     print("Bot Stooped")
+                #     ws.close()
+
             #         order(SIDE_BUY,10,current_price,symbol)
             #         buy_counter+=1
             #         print(f"BidPrice{bid_price}:::current_price{current_price}")
@@ -196,7 +213,7 @@ class BotOperation(APIView):
             # price1 = msg['p']
             # if price1 > (float(price)*1)*100:
                 # pass
-            sleep(30)
+            # sleep(30)
             # cancel_order(symbol)
             # if closing_rate >= sell_limit:
             #     order("SELL", 100)
@@ -207,8 +224,9 @@ class BotOperation(APIView):
         websocket_app = websocket.WebSocketApp(SOCKET, on_open=on_open, on_close=on_close, on_error=on_error,
                                                on_message=on_message)
 
-        request.session['websocket_app'] = websocket_app
+        # request.session['websocket_app'] = websocket_app
         websocket_app.run_forever()
+        return JsonResponse({"process":"Bot Stoped"})
 
     @api_view(['GET'])
     @permission_classes([permissions.AllowAny])

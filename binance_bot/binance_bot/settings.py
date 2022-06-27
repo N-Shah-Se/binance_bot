@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'manual_trading',
     'kyc_app',
     'discount',
+    'razorpay_app',
 ]
 
 MIDDLEWARE = [

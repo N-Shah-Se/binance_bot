@@ -7,10 +7,10 @@ from django.core.validators import RegexValidator
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.conf import settings
 from datetime import datetime, timedelta
+from .constants import KYCStatus
 
 phone_regex = RegexValidator(regex=r'^\+?1?\d{9,15}$',
                                 message = "Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")
-
 
 class KYC(models.Model):
     title = models.CharField(max_length=150)
@@ -33,6 +33,7 @@ class KYC(models.Model):
     account_holder = models.CharField(max_length=100, null=True,default=None)
     ifsc_code = models.CharField(max_length=200, null=True,default=None)
     bank_name = models.CharField(max_length=100)
+    status = models.CharField(max_length=100,default=KYCStatus.PENDING)
 
     def __str__(self):
         return self.cnic
