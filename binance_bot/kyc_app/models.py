@@ -7,12 +7,27 @@ from django.core.validators import RegexValidator
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.conf import settings
 from datetime import datetime, timedelta
+
+from discount.models import Referal, ReferalIncrement
+from user_account.models import Account
 from .constants import KYCStatus
 
 phone_regex = RegexValidator(regex=r'^\+?1?\d{9,15}$',
                                 message = "Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")
 
+
+def get_referal_code():
+    referal_code = ReferalIncrement.objects.last()
+    if not referal_code:
+        referal_code = ReferalIncrement.objects.create(referal_code="2803")
+    print(referal_code.referal_code)
+    referal_code.referal_code = int(referal_code.referal_code) + 1
+    referal_code.save()
+    return referal_code.referal_code
+
+
 class KYC(models.Model):
+    account = models.OneToOneField(Account, on_delete=models.RESTRICT, null=True, blank=True)
     title = models.CharField(max_length=150)
     name = models.CharField(max_length=150)
     fname = models.CharField(max_length=150)
@@ -37,3 +52,12 @@ class KYC(models.Model):
 
     def __str__(self):
         return self.cnic
+
+    def save(self, *args, **kwargs):
+        changed_status = self.status
+        if changed_status==KYCStatus.SUCCESS:
+            ref_code = get_referal_code()
+            print(ref_code)
+            ref_code = 'GFM'+str(ref_code)
+            Referal.objects.create(account=self.account,referal_code=ref_code)
+        return super().save(*args, **kwargs)

@@ -12,6 +12,7 @@ from user_account.models import Account
 
 # Create your views here.
 class GFM:
+   
     i=107
 
 class discount(APIView):
@@ -33,7 +34,7 @@ class discount(APIView):
                 magic_bonus = (total_per*10)/100
                 balance = total_per - (tds + magic_bonus)
                 DiscountBonus.objects.create(tds=tds,ref_code=ref_code,account=request.user,magic_bonus=magic_bonus,balance=balance)
-                Referal.objects.create(account=request.user,referal_code=ref_code)
+                # Referal.objects.create(account=request.user,referal_code=ref_code)
 
         except Exception as e:
             return JsonResponse({"success":False , "message":f"{e}" })
@@ -70,4 +71,17 @@ class discount(APIView):
         return JsonResponse({"success":True , "message":data })
 
 
+class referal_code(APIView):
+    @api_view(['GET'])
+    @permission_classes([permissions.AllowAny])
+    def get_referal_code(request):
+        try:
+            email = request.GET['email']
+            ref_code = Referal.objects.get(account=Account.objects.get(email=email)).referal_code
+            print(ref_code)
+        except Exception as e:
+            return JsonResponse({"success":False , "message":f"{e}" })
+        data = {"ref_no":ref_code}
+        return JsonResponse({"success":True , "message":data })
+            
 

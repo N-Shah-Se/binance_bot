@@ -8,6 +8,9 @@ from user_account.models import Account
 
 # Create your models here.
 
+class ReferalIncrement(models.Model):
+    referal_code = models.IntegerField()
+
 class Referal(models.Model):
     account = models.OneToOneField(Account, on_delete=models.RESTRICT, null=True, blank=True)
     # unique code Ex: GFM107
