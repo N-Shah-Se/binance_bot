@@ -21,7 +21,7 @@ class discount(APIView):
     @permission_classes([permissions.AllowAny])
     def bonus_discount(request):
         try:
-            is_company_referal = Accounts.objects.filter(invitation_code="GFM2803")
+            is_company_referal = Account.objects.filter(invitation_code="GFM2803")
             if is_company_referal:
                 account_balance = request.GET['account_balance']
                 # ref_code = request.GET['ref_code']
@@ -32,17 +32,18 @@ class discount(APIView):
                 tds = (total_per * 5)/100
                 magic_bonus = (total_per*10)/100
                 balance = total_per - (tds + magic_bonus)
-                DiscountBonus.objects.create(tds=tds,ref_code=ref_code,account=request.user,magic_bonus=magic_bonus,balance=balance)
-                Referal.objects.create(account=request.user,referal_code=ref_code)
+                # DiscountBonus.objects.create(tds=tds,ref_code=ref_code,account=request.user,magic_bonus=magic_bonus,balance=balance)
+                DiscountBonus.objects.create(tds=tds,account=request.user,magic_bonus=magic_bonus,balance=balance)
+                # Referal.objects.create(account=request.user,referal_code=ref_code)
 
         except Exception as e:
-            return JsonResponse({"success":False , "message":f"{e}" })
+            return JsonResponse({"status":False , "message":f"{e}" })
             # res = serializers.ValidationError({'message':f'{e}', 'status_code':'500'})
             # # res.status_code = 200
             # raise res
         # user = Profile.objects.get(email=request.user.email)
         data = {"ref_no":gfm_code,"tds":"{:.2f}".format(tds),"magic_bonus":"{:.2f}".format(magic_bonus),"balance":"{:.2f}".format(balance)}
-        return JsonResponse({"success":True , "message":data })
+        return JsonResponse({"status":True , "message":data })
 
 
     @api_view(['GET'])

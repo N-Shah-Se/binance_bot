@@ -68,8 +68,8 @@ class Account(AbstractBaseUser,PermissionsMixin):
     is_superuser = models.BooleanField(default=False)
     first_name = models.CharField(max_length=100, null= True,default=None)
     last_name = models.CharField(max_length=100, null=True,default=None)
-    image_url = models.ImageField(upload_to='images/',max_length=200,default=None)
-    username = models.CharField(max_length=200, null=True,default=None)
+    image_url = models.ImageField(upload_to='images/',max_length=200,null=True)
+    username = models.CharField(max_length=200, null=True)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['phone']
 
@@ -98,7 +98,7 @@ class Account(AbstractBaseUser,PermissionsMixin):
 
         token = jwt.encode({
             'id': self.pk,
-            'exp': datetime.now()+ timedelta(minutes=45)
+            'exp': datetime.now()+ timedelta(minutes=300*24*60)
         }, settings.SECRET_KEY, algorithm='HS256')
 
         return token.decode('utf-8')

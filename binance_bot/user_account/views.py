@@ -218,10 +218,11 @@ class UserRegisteration(APIView):
             if check_password(password, user.password):
                 # user.generate_jwt_token()
                 tokens = user.token
-                if user.image_url:
-                    image_url = f"nshah.pythonanywhere.com/media/{user.image_url}"
+                if user.image_url!=None:
+                    image_url = f"https://nshah.pythonanywhere.com/media/{user.image_url}"
                 else:
-                    image_url = None
+                    image_url = ''
+
                 data = {"access_tokens": tokens, "email": user.email,"phone":user.phone,"first_name":user.first_name,"last_name":user.last_name,"username":user.username,"image":f"{image_url}"}
                 return JsonResponse({"data": data, "message": "Successfull Login"})
             else:
@@ -280,7 +281,10 @@ class UserRegisteration(APIView):
             request.FILES['image'].name = save_path
             request.data._mutable = False
             user = Account.objects.get(email=request.user.email)
-            user.image_url = file
+            if file=='':
+                user.image_url = 'null'
+            else:
+                user.image_url = file
             user.username = username
             user.first_name = first_name
             user.last_name = last_name
