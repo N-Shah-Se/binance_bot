@@ -33,9 +33,16 @@ def userLogin(request):
             email = request.POST.get('email')
             password = request.POST.get('password')
             user = authenticate(request ,email=email, password=password)
+
             print(f"{user}")
             if user is not None:
                 login(request, user)
+                try:
+                    user = Account.objects.get(email=email)
+                    request.session['name'] = user.first_name + ' ' + user.last_name
+                    request.session['image'] = 'https://nshah.pythonanywhere.com/media/'+str(user.image_url)
+                except:
+                    print("s")
                 print(f"{user}")
                 return redirect('home')
             else:
