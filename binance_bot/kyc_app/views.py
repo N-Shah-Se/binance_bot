@@ -22,6 +22,9 @@ class KycUser(APIView):
     @permission_classes([permissions.AllowAny])
     def add_data(request):
         try:
+            authenticated = request.session.get('authenticated')
+            if authenticated==False:
+                return JsonResponse({"status": False, "message": "Please Login To Use The App"})
             name = request.data['name']
             fname = request.data['fname']
             gender = request.data['gender']
@@ -80,6 +83,9 @@ class KycUser(APIView):
     @api_view(['GET'])
     @permission_classes([permissions.AllowAny])
     def get_status(request):
+        authenticated = request.session.get('authenticated')
+        if authenticated==False:
+            return JsonResponse({"status": False, "message": "Please Login To Use The App"})
         data = {}
         try:
             email = request.user.email

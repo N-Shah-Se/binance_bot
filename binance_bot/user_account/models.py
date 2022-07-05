@@ -68,7 +68,7 @@ class Account(AbstractBaseUser,PermissionsMixin):
     is_superuser = models.BooleanField(default=False)
     first_name = models.CharField(max_length=100, null= True,default=None)
     last_name = models.CharField(max_length=100, null=True,default=None)
-    image_url = models.ImageField(upload_to='images/',max_length=200,null=True)
+    image_url = models.ImageField(upload_to='images/',max_length=200,null=True,default=None)
     username = models.CharField(max_length=200, null=True)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['phone']

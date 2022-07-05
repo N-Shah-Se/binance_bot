@@ -53,6 +53,12 @@
                     </a>
                 </li>
 
+                <li class="sidebar-item">
+                    <a class="sidebar-link" href="{% url 'kyc_user_update' %}">
+                        <i class="align-middle" data-feather="user"></i> <span class="align-middle">KYC</span>
+                    </a>
+                </li>
+
 
         </div>
     </nav>
@@ -271,7 +277,7 @@
                                     <td class="d-none d-xl-table-cell">{{user.email}}</td>
                                     <td><span class="badge bg-success">{{user.invitation_code}}</span></td>
                                     <td class="d-none d-md-table-cell">{{user.account_created}}</td>
-                                    <td><img src={{user.image_url}} alt="Image Loading Failed" width="70" height="70"></td>
+                                    <td><img src="https://nshah.pythonanywhere.com/media/{{user.image_url}}" alt="Image Loading Failed" width="70" height="70"></td>
 
                                 </tr>
                                 {% endfor %}

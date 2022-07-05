@@ -36,6 +36,9 @@ class BotOperation(APIView):
     @api_view(['POST'])
     # @permission_classes([permissions.AllowAny])
     def check_credentials(request):
+        authenticated = request.session.get('authenticated')
+        if authenticated==False:
+            return JsonResponse({"status": False, "message": "Please Login To Use The App"})
         api_key = request.data['api_key']
         secret_key = request.data['secret_key']
         try:
@@ -83,13 +86,16 @@ class BotOperation(APIView):
     @api_view(['GET'])
     # @permission_classes([permissions.AllowAny])
     def start_bot(request):
+        authenticated = request.session.get('authenticated')
+        if authenticated==False:
+            return JsonResponse({"status": False, "message": "Please Login To Use The App"})
         class test_class:
             client=''
             bidding=''
             tradeA = False
             tradeB = False
             user = ""
-        user_otp = request.GET['otp']
+        user_otp = request.body['otp']
         otp = request.session.get('verification_otp')
 
         if int(user_otp) != otp:
@@ -351,6 +357,9 @@ class BotOperation(APIView):
     @api_view(['GET'])
     @permission_classes([permissions.AllowAny])
     def live_price(request):
+        authenticated = request.session.get('authenticated')
+        if authenticated==False:
+            return JsonResponse({"status": False, "message": "Please Login To Use The App"})
         key = "https://api.binance.com/api/v3/ticker/price?symbol="
         currencies = ["BTCUSDT", "ETHUSDT", "AAVEUSDT","XRPUSDT"]
         data_list = []
@@ -362,13 +371,7 @@ class BotOperation(APIView):
             # sock = f"wss://stream.binance.com:9443/ws/{i.lower()}@kline_1m"
         return JsonResponse({"data": data_list})
 
-    @api_view(['POST'])
-    @permission_classes([permissions.AllowAny])
-    def test_script(request):
-        return JsonResponse({"data": price_info.order})
 
-
-        # return JsonResponse({"data": data_list})
 
 
 

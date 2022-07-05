@@ -18,7 +18,7 @@ from rest_framework import response, permissions
 from rest_framework.decorators import permission_classes
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
-
+from django.contrib import auth
 
 # Create your views here.
 
@@ -38,11 +38,11 @@ def send_otp(number, message):
 
 class OtpOperation(views.APIView):
 
-    @api_view(['GET'])
+    @api_view(['POST'])
     @permission_classes([permissions.AllowAny])
     def get_phone_otp(request):
-        phone = request.GET['phone']
-        call_for = request.GET['call_for']
+        phone = request.data['phone']
+        call_for = request.data['call_for']
         request.session['phone'] = phone
         otp = random.randint(100000, 999999)
         request.session['otp'] = otp
@@ -62,10 +62,10 @@ class OtpOperation(views.APIView):
             raise res
 
 
-    @api_view(['GET'])
+    @api_view(['POST'])
     @permission_classes([permissions.AllowAny])
     def phone_verfication(request):
-        user_otp = request.GET['otp']
+        user_otp = request.data['otp']
         otp = request.session.get('otp')
 
         if int(user_otp) == otp:
@@ -76,14 +76,14 @@ class OtpOperation(views.APIView):
             res = serializers.ValidationError({'message':'Phone Otp Not Verified', 'status_code':'400'})
             raise res
 
-    @api_view(['GET'])
+    @api_view(['POST'])
     @permission_classes([permissions.AllowAny])
     def get_email_otp(request):
         otp = random.randint(100000, 999999)
         request.session['email_otp'] = otp
-        email = request.GET['email']
+        email = request.data['email']
         print(otp)
-        call_for = request.GET['call_for']
+        call_for = request.data['call_for']
         request.session['email'] = email
         message = ""
         if call_for.lower() == 'signup':
@@ -108,7 +108,7 @@ class OtpOperation(views.APIView):
     @api_view(["POST"])
     @permission_classes([permissions.AllowAny])
     def email_verification(request):
-        user_otp = request.GET['otp']
+        user_otp = request.data['otp']
         otp = request.session.get('email_otp')
         if int(user_otp) == otp:
             request.session.delete('email_otp')
@@ -125,10 +125,10 @@ class UserRegisteration(APIView):
     @api_view(['POST'])
     @permission_classes([permissions.AllowAny])
     def add_user(request):
-        password = request.GET['password']
-        phone_otp = request.GET['phone_otp']
-        email_otp = request.GET['email_otp']
-        invitation_code = request.GET['invitation_code']
+        password = request.data['password']
+        phone_otp = request.data['phone_otp']
+        email_otp = request.data['email_otp']
+        invitation_code = request.data['invitation_code']
         email = request.session.get('email_otp')
         phone = request.session.get('otp')
         # #        otp = request.session['email_otp']
@@ -180,12 +180,12 @@ class UserRegisteration(APIView):
                 raise res
             # return JsonResponse({"msg": "User Account created"})
 
-    @api_view(['GET'])
+    @api_view(['POST'])
     @permission_classes([permissions.AllowAny])
     def userLogin(request):
-        password = request.GET['password']
-        operation = request.GET['operation']
-        otp = request.GET['otp']
+        password = request.data['password']
+        operation = request.data['operation']
+        otp = request.data['otp']
         if '@' in str(operation):
             email = request.session.get('email_otp')
             if int(otp) != email:
@@ -214,14 +214,18 @@ class UserRegisteration(APIView):
                 res = serializers.ValidationError({'message':'User not exists, please signup first.', 'status_code':'400'})
                 # res.status_code = 200
                 raise res
+
         if user:
             if check_password(password, user.password):
                 # user.generate_jwt_token()
                 tokens = user.token
-                if user.image_url!=None:
+                if user.image_url:
                     image_url = f"https://nshah.pythonanywhere.com/media/{user.image_url}"
                 else:
-                    image_url = ''
+                    image_url=user.image_url
+                request.session.delete('email_otp')
+                request.session.delete('otp')
+                request.session['authenticated']=True
 
                 data = {"access_tokens": tokens, "email": user.email,"phone":user.phone,"first_name":user.first_name,"last_name":user.last_name,"username":user.username,"image":f"{image_url}"}
                 return JsonResponse({"data": data, "message": "Successfull Login"})
@@ -246,7 +250,10 @@ class UserRegisteration(APIView):
     @api_view(['POST'])
     @permission_classes([permissions.AllowAny])
     def change_password(request):
-        password = request.GET['password']
+        authenticated = request.session.get('authenticated')
+        if authenticated==False:
+            return JsonResponse({"status": False, "message": "Please Login To Use The App"})
+        password = request.data['password']
         email = request.session.get('email')
         phone = request.session.get('phone')
 
@@ -268,6 +275,9 @@ class UserRegisteration(APIView):
     @api_view(['POST'])
     @permission_classes([permissions.AllowAny])
     def set_profile(request):
+        authenticated = request.session.get('authenticated')
+        if authenticated==False:
+            return JsonResponse({"status": False, "message": "Please Login To Use The App"})
         username = request.data["username"]
         first_name = request.data['first_name']
         last_name = request.data['last_name']
@@ -281,10 +291,8 @@ class UserRegisteration(APIView):
             request.FILES['image'].name = save_path
             request.data._mutable = False
             user = Account.objects.get(email=request.user.email)
-            if file=='':
-                user.image_url = 'null'
-            else:
-                user.image_url = file
+
+            user.image_url = file
             user.username = username
             user.first_name = first_name
             user.last_name = last_name
@@ -294,8 +302,20 @@ class UserRegisteration(APIView):
             # res.status_code = 200
             raise res
         user = Account.objects.get(email=request.user.email)
-        data = {"first_name":user.first_name,"last_name":user.last_name,"username":user.username,"image":f"nshah.pythonanywhere.com/media/{user.image_url}"}
+        data = {"first_name":user.first_name,"last_name":user.last_name,"username":user.username,"image":f"https://nshah.pythonanywhere.com/media/{user.image_url}"}
         return JsonResponse({"success":True , "data": data})
 
 
-
+    @api_view(['GET'])
+    @permission_classes([permissions.AllowAny])
+    def logout(request):
+        try:
+            # auth.logout(request)
+            authenticated = request.session.get('authenticated')
+            if authenticated==False:
+                return JsonResponse({"status": False, "message": "Please Login To Use The App"})
+            request.session['authenticated']=False
+            # request.user.token().delete()
+            return JsonResponse({"status":True , "message": "Logout Successfully" })
+        except Exception as ex:
+            return JsonResponse({"status":False , "message": f"{ex}" })

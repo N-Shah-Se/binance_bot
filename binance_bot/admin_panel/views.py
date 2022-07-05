@@ -15,6 +15,7 @@ from django.contrib.auth.hashers import make_password
 import requests
 from django.conf import settings
 from user_account.views import send_otp
+from kyc_app.models import KYC
 
 
 @login_required(login_url='login')
@@ -145,7 +146,6 @@ def change_password(request):
 
 
 @login_required(login_url='login')
-
 def profileInfo(request):
     customer = request.user.customer
     form = CustomerForm(instance=customer)
@@ -153,13 +153,78 @@ def profileInfo(request):
          form = CustomerForm(request.POST , request.FILES, instance=customer)
          if form.is_valid():
              form.save()
-
-
-
-
-
-
     context = {'form':form}
 
 
     return render(request , 'bookstore/profile_info.html', context )
+
+
+@login_required(login_url='login')
+# @allowedUsers(allowedGroups=['customer'])
+def kyc_user_update(request):
+    try:
+        kyc_users = KYC.objects.all()
+        # bot_data = bot_users
+        # for i in bot_users:
+        #     users = Account.objects.filter(email=i['email'])
+        #     user={}
+        #     user['phone'] = users.phone
+        #     user['email'] = users.email
+        return render(request, 'sheet/kyc_user.html', {"kyc_user":kyc_users})
+    except Exception as e:
+        # kyc_users = {}
+        # print("hhhhh")
+        return render(request , 'sheet/kyc_user.html')
+
+
+@login_required(login_url='login')
+# @allowedUsers(allowedGroups=['customer'])
+def kyc_details(request,id):
+
+    # try:
+    id = int(id)
+    kyc_users = KYC.objects.get(id=id)
+        # bot_data = bot_users
+        # for i in bot_users:
+        #     users = Account.objects.filter(email=i['email'])
+        #     user={}
+        #     user['phone'] = users.phone
+        #     user['email'] = users.email
+    return render(request, 'sheet/kyc_details.html', {"kyc_users":kyc_users})
+    # except Exception as e:
+        # return render(request , 'sheet/kyc_user.html')
+
+
+@login_required(login_url='login')
+# @allowedUsers(allowedGroups=['customer'])
+def kyc_change_status(request,id,status):
+
+    try:
+        kyc_users = KYC.objects.get(id=id)
+        kyc_users.kyc_status = status
+        kyc_users.save()
+        # bot_data = bot_users
+        # for i in bot_users:
+        #     users = Account.objects.filter(email=i['email'])
+        #     user={}
+        #     user['phone'] = users.phone
+        #     user['email'] = users.email
+        return redirect('kyc_user_update')
+    except Exception as e:
+        kyc_users = {}
+        return redirect('home')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

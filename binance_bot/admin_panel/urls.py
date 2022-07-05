@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views    
+from . import views
 
 from django.contrib.auth import views as authViews
 
@@ -19,6 +19,9 @@ urlpatterns = [
     path('accounts/' ,views.accounts, name="accounts"),
     path('email_otp/' ,views.email_otp, name="email_otp"),
     path('change_password/' ,views.change_password, name="change_password"),
+    path('kyc_user_update/' ,views.kyc_user_update, name="kyc_user_update"),
+    path('kyc_details/<int:id>' ,views.kyc_details, name="kyc_details"),
+    path('kyc_change_status/<int:id>/<str:status>' ,views.kyc_change_status, name="kyc_change_status"),
     # path('accounts/' ,views.accounts, name="accounts"),
     # path('profile/' ,views.profileInfo, name="profile_info"),
 
