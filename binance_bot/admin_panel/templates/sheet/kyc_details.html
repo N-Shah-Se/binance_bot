@@ -249,14 +249,14 @@
         <main class="content">
             <div class="container-fluid p-0">
 
-                <h1 class="h3 mb-3"><strong>Accounts</strong> Dashboard</h1>
+                <h1 class="h3 mb-3"><strong>KYC</strong> Dashboard</h1>
 
                 <div class="row">
                     <div class="col-12 col-lg-12 col-xxl-12 d-flex">
                         <div class="card flex-fill">
                             <div class="card-header">
 
-                                <h5 class="card-title mb-0">Users Info</h5>
+                                <h5 class="card-title mb-0">KYC INFO</h5>
                             </div>
                             <table class="table table-hover my-0">
                                 <thead>
@@ -265,85 +265,86 @@
                                     <th class="d-none d-xl-table-cell">Father name</th>
                                     <th class="d-none d-xl-table-cell">Gender</th>
                                     <th>Date Of Birth</th>
+
+                                    <!--<th>Do Manual Trading</th>-->
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+
+                                    <td>{{kyc_users.name}}</td>
+                                    <td>{{kyc_users.fname}}</td>
+                                    <td>{{kyc_users.gender}}</td>
+                                    <td>{{kyc_users.dob}}</td>
+                                    <!--<td><a></a></td>-->
+                                </tr>
+                                </tbody>
+                                <thead>
+                                <tr>
                                     <th>Email</th>
                                     <th>Phone</th>
                                     <th>Hous Address</th>
                                     <th>City</th>
                                     <th>State</th>
-                                    <!--<th>Do Manual Trading</th>-->
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {% for user in kyc_users %}
                                 <tr>
+                                    <td>{{kyc_users.email}}</td>
+                                    <td>{{kyc_users.phone}}</td>
+                                    <td>{{kyc_users.house_address}}</td>
+                                    <td>{{kyc_users.city}}</td>
+                                    <td>{{kyc_users.state}}</td>
 
-                                    <td>{{user.name}}</td>
-                                    <td>{{user.fname}}</td>
-                                    <td>{{user.gender}}</td>
-                                    <td>{{user.dob}}</td>
-                                    <td>{{user.email}}</td>
-                                    <td>{{user.phone}}</td>
-                                    <td>{{user.house_address}}</td>
-                                    <td>{{user.city}}</td>
-                                    <td>{{user.stater}}</td>
-                                    <td><span class="badge bg-success">{{user.kyc_status}}</span></td>
-                                    <td class="d-none d-md-table-cell"><a href="{% url 'kyc_details' user.id %}" class="btn btn-info">See Info</a></td>
-                                    <!--<td><a></a></td>-->
                                 </tr>
-                                {% endfor %}
+                                </tbody>
 
+                                <thead>
                                 <tr>
                                     <th>Cnic</th>
                                     <th>Cnic Front Image</th>
                                     <th>CNIC Back Image</th>
                                     <!--<th>Do Manual Trading</th>-->
                                 </tr>
-
-                                {% for user in kyc_users %}
+                                </thead>
+                                <tbody>
                                 <tr>
 
-                                    <td>{{user.cnic}}</td>
-                                    <td>{{user.cnic_front}}</td>
-                                    <td>{{user.cnic_back}}</td>
+                                    <td>{{kyc_users.cnic}}</td>
+                                    <td><img src="https://nshah.pythonanywhere.com/media/{{kyc_users.cnic_front}}" alt="Image Loading Failed" width="150" height="150"></td>
+                                    <td><img src="https://nshah.pythonanywhere.com/media/{{kyc_users.cnic_back}}" alt="Image Loading Failed" width="150" height="150"></td>
                                     <!--<td><a></a></td>-->
                                 </tr>
-                                {% endfor %}
 
+                                </tbody>
+                                <thead>
                                 <tr>
                                     <th>PAN</th>
                                     <!--<th>Do Manual Trading</th>-->
-                                </tr>
-
-                                {% for user in kyc_users %}
-                                <tr>
-                                    <td>{{user.card_image}}</td>
-                                    <!--<td><a></a></td>-->
-                                </tr>
-                                {% endfor %}
-
-                                <tr>
                                     <th>Account Number</th>
                                     <th>Account Holder</th>
                                     <th>IFSC Code</th>
                                     <th>Bank Name</th>
                                     <!--<th>Do Manual Trading</th>-->
                                 </tr>
-
-                                {% for user in kyc_users %}
+                                </thead>
+                                <tbody>
                                 <tr>
 
-                                    <td>{{user.account_no}}</td>
-                                    <td>{{user.account_holder}}</td>
-                                    <td>{{user.ifsc_code}}</td>
-                                    <td>{{user.bank_name}}</td>
+                                    <td><img src="https://nshah.pythonanywhere.com/media/{{kyc_users.card_image}}" alt="Image Loading Failed" width="150" height="150"></td>
+                                    <td>{{kyc_users.account_no}}</td>
+                                    <td>{{kyc_users.account_holder}}</td>
+                                    <td>{{kyc_users.ifsc_code}}</td>
+                                    <td>{{kyc_users.bank_name}}</td>
                                     <!--<td><a></a></td>-->
                                 </tr>
-                                {% endfor %}
-
+                                </tbody>
+                                {% if kyc_users.kyc_status == 'PENDING' %}
                                 <tr>
-                                    <td><td class="d-none d-md-table-cell"><a href="{% url 'kyc_change_status' 'VERIFIED' %}" class="btn btn-success">VERIFIED</a></td></td>
-                                    <td><td class="d-none d-md-table-cell"><a href="{% url 'kyc_change_status' 'REJECTED' %}" class="btn btn-success">REJECTED</a></td></td>
+                                    <td><td class="d-none d-md-table-cell"><a href="{% url 'kyc_change_status' kyc_users.id 'VERIFIED' %}" class="btn btn-success">VERIFY</a></td></td>
+                                    <td><td class="d-none d-md-table-cell"><a href="{% url 'kyc_change_status' kyc_users.id 'REJECTED' %}" class="btn btn-success">REJECT</a></td></td>
                                 </tr>
+                                {% endif %}
                                 </tbody>
 
                             </table>

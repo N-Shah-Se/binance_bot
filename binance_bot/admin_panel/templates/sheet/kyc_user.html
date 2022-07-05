@@ -256,7 +256,7 @@
                         <div class="card flex-fill">
                             <div class="card-header">
 
-                                <h5 class="card-title mb-0">Users Info</h5>
+                                <h5 class="card-title mb-0">PENDING KYC</h5>
                             </div>
                             <table class="table table-hover my-0">
                                 <thead>
@@ -272,6 +272,86 @@
                                 <tbody>
                                 {% for user in kyc_user %}
                                     {% if user.kyc_status == 'PENDING' %}
+                                <tr>
+
+                                    <td>{{user.name}}</td>
+                                    <td class="d-none d-xl-table-cell">{{user.fname}}</td>
+                                    <td class="d-none d-xl-table-cell">{{user.cnic}}</td>
+                                    <td><span class="badge bg-success">{{user.kyc_status}}</span></td>
+                                    <td class="d-none d-md-table-cell"><a href="{% url 'kyc_details' user.id %}" class="btn btn-info">See Info</a></td>
+                                    <!--<td><a></a></td>-->
+                                </tr>
+                                    {% endif %}
+                                {% endfor %}
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="row">
+                    <div class="col-12 col-lg-12 col-xxl-12 d-flex">
+                        <div class="card flex-fill">
+                            <div class="card-header">
+
+                                <h5 class="card-title mb-0">VERIFIED KYC</h5>
+                            </div>
+                            <table class="table table-hover my-0">
+                                <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th class="d-none d-xl-table-cell">Father Name</th>
+                                    <th class="d-none d-xl-table-cell">CNIC</th>
+                                    <th>Application Status</th>
+                                    <!--<th>Check Details</th>-->
+                                    <!--<th>Do Manual Trading</th>-->
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for user in kyc_user %}
+                                    {% if user.kyc_status == 'VERIFIED' %}
+                                <tr>
+
+                                    <td>{{user.name}}</td>
+                                    <td class="d-none d-xl-table-cell">{{user.fname}}</td>
+                                    <td class="d-none d-xl-table-cell">{{user.cnic}}</td>
+                                    <td><span class="badge bg-success">{{user.kyc_status}}</span></td>
+                                    <td class="d-none d-md-table-cell"><a href="{% url 'kyc_details' user.id %}" class="btn btn-info">See Info</a></td>
+                                    <!--<td><a></a></td>-->
+                                </tr>
+                                    {% endif %}
+                                {% endfor %}
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="row">
+                    <div class="col-12 col-lg-12 col-xxl-12 d-flex">
+                        <div class="card flex-fill">
+                            <div class="card-header">
+
+                                <h5 class="card-title mb-0">REJECTED KYC</h5>
+                            </div>
+                            <table class="table table-hover my-0">
+                                <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th class="d-none d-xl-table-cell">Father Name</th>
+                                    <th class="d-none d-xl-table-cell">CNIC</th>
+                                    <th>Application Status</th>
+                                    <!--<th>Check Details</th>-->
+                                    <!--<th>Do Manual Trading</th>-->
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for user in kyc_user %}
+                                    {% if user.kyc_status == 'REJECTED' %}
                                 <tr>
 
                                     <td>{{user.name}}</td>
