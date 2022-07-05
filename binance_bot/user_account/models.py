@@ -70,6 +70,7 @@ class Account(AbstractBaseUser,PermissionsMixin):
     last_name = models.CharField(max_length=100, null=True,default=None)
     image_url = models.ImageField(upload_to='images/',max_length=200,default=None)
     username = models.CharField(max_length=200, null=True,default=None)
+    
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['phone']
 

@@ -61,3 +61,5 @@ class KYC(models.Model):
             ref_code = 'GFM'+str(ref_code)
             Referal.objects.create(account=self.account,referal_code=ref_code)
         return super().save(*args, **kwargs)
+
+

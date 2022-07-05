@@ -1,3 +1,4 @@
+from pyexpat import model
 from django.db import models
 
 # Create your models here.
@@ -7,6 +8,13 @@ import uuid
 from user_account.models import Account
 
 # Create your models here.
+
+BONUS_TYPE = (
+    ("discount", "discount"),
+    ("direct", "direct"),
+    ("leadership", "leadership"),
+    ("magic", "magic"),
+)
 
 class ReferalIncrement(models.Model):
     referal_code = models.IntegerField()
@@ -18,8 +26,8 @@ class Referal(models.Model):
 
 class DiscountBonus(models.Model):
 
-    account = models.OneToOneField(Account, on_delete=models.RESTRICT, null=True, blank=True)
-
+    #account = models.OneToOneField(Account, on_delete=models.RESTRICT, null=True, blank=True)
+    account = models.ForeignKey(Account, on_delete=models.RESTRICT)
     # OneToOne relatioship
     # To delete it you will have to delete all objects that reference it manually. RESTRICT
     # to='funds.Payment' used to avoid Circular (or cyclic) imports
@@ -30,13 +38,13 @@ class DiscountBonus(models.Model):
     tds = models.DecimalField(max_digits=9, decimal_places=2, null=True, blank=True)
     magic_bonus = models.DecimalField(max_digits=9, decimal_places=2, null=True, blank=True)
     balance = models.DecimalField(max_digits=9, decimal_places=2, null=True, blank=True)
-
-
-
-
     # create Timestamp automatically
     created = models.DateTimeField(auto_now_add=True)
     id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
+
+    bonus_type = models.CharField(max_length=255)
+    re_top_up_status = models.BooleanField(default=False)
+    remark = models.CharField(max_length=150)
 
     # to get right name in admin panel
     class Meta:
@@ -112,3 +120,48 @@ class DirectBonus(models.Model):
 
 #     # def __str__(self):
 #     #     return self.directbonus.ref_num
+
+
+class special_days(models.Model):
+    title = models.CharField(max_length=150)
+    special_date = models.DateField()
+    def __str__(self):
+        return self.title
+
+class LeadershipBonus(models.Model):
+    rank = models.CharField(max_length=50)
+    target = models.IntegerField()
+    incentive_percentage = models.FloatField()
+    referral_chart= models.CharField(max_length=75)
+
+    def __str__(self):
+        return self.rank 
+
+class ReTopUpBonus(models.Model):
+    rank = models.CharField(max_length=50)
+    incentive_percentage = models.FloatField()
+    def __str__(self):
+        return self.rank 
+
+class LeadershipInfo(models.Model):
+    account = models.ForeignKey(Account, on_delete=models.RESTRICT)
+    for_account = models.ForeignKey(Account, on_delete=models.RESTRICT, related_name='for_member', default='1')
+    direct_count = models.IntegerField()
+    indirect_count = models.IntegerField()
+    total_count = models.IntegerField()
+    rank = models.ForeignKey(LeadershipBonus, on_delete=models.CASCADE)
+    
+    # tds = models.DecimalField(max_digits=9, decimal_places=2, null=True, blank=True)
+    # magic_bonus = models.DecimalField(max_digits=9, decimal_places=2, null=True, blank=True)
+    # balance = models.DecimalField(max_digits=9, decimal_places=2, null=True, blank=True)
+    # create Timestamp automatically
+    created = models.DateTimeField(auto_now_add=True)
+    id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
+
+    def __str__(self):
+        return self.account.email
+
+class StarCount(models.Model):
+    account = models.ForeignKey(Account, on_delete=models.RESTRICT)
+    no_of_star = models.IntegerField(default=1)
+    created = models.DateTimeField(auto_now_add=True)
