@@ -24,7 +24,7 @@ class ManualOperation(APIView):
 		    authenticated = request.session.get('authenticated')
 		    if authenticated==False:
 		        return JsonResponse({"status": False, "message": "Please Login To Use The App"})
-		        query_chk = BotUser.objects.get(user=request.user.email)
+		    query_chk = BotUser.objects.get(user=request.user.email)
 		except:
 			return JsonResponse({"success": False, "message": "User API key and Secret Key is not availabel"})
 
