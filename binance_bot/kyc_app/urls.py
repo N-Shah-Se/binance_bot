@@ -8,4 +8,5 @@ from .views import KycUser
 
 urlpatterns = [
     path('add_kyc/',KycUser.add_data),
+    path('get_status/',KycUser.get_status),
 ]

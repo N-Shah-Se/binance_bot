@@ -22,6 +22,9 @@ class KycUser(APIView):
     @permission_classes([permissions.AllowAny])
     def add_data(request):
         try:
+            authenticated = request.session.get('authenticated')
+            if authenticated==False:
+                return JsonResponse({"status": False, "message": "Please Login To Use The App"})
             name = request.data['name']
             fname = request.data['fname']
             gender = request.data['gender']
@@ -62,8 +65,9 @@ class KycUser(APIView):
             bank_name = request.data['bank_name']
             email = request.data['email']
             phone = request.data['phone']
+            login_email = request.user.email
 
-            user = KYC.objects.create(name=name,fname=fname,gender=gender,dob=dob,email=email,phone=phone,house_address=house_address,city=city,state=state,pin_code=pin_code,cnic=cnic,cnic_front=cnic_front,cnic_back=cnic_back,card_no=card_no,card_image=card_image,account_no=account_no,account_holder=account_holder,ifsc_code=ifsc_code,bank_name=bank_name)
+            user = KYC.objects.create(name=name,fname=fname,gender=gender,dob=dob,email=email,phone=phone,house_address=house_address,city=city,state=state,pin_code=pin_code,cnic=cnic,cnic_front=cnic_front,cnic_back=cnic_back,card_no=card_no,card_image=card_image,account_no=account_no,account_holder=account_holder,ifsc_code=ifsc_code,bank_name=bank_name,login_email=login_email)
             # user.save()
 
         except Exception as e:
@@ -76,4 +80,23 @@ class KycUser(APIView):
         return JsonResponse({"success":True , "message":"Successfully saved data" })
 
 
-
+    @api_view(['GET'])
+    @permission_classes([permissions.AllowAny])
+    def get_status(request):
+        authenticated = request.session.get('authenticated')
+        if authenticated==False:
+            return JsonResponse({"status": False, "message": "Please Login To Use The App"})
+        data = {}
+        try:
+            email = request.user.email
+            kyc_status = KYC.objects.get(login_email=email)
+            if kyc_status:
+                data = {"kyc_status":kyc_status.kyc_status}
+        except Exception as e:
+            return JsonResponse({"success":False , "message":f"{e}" })
+            # res = serializers.ValidationError({'message':f'{e}', 'status_code':'500'})
+            # # res.status_code = 200
+            # raise res
+        # user = Profile.objects.get(email=request.user.email)
+        # data = {"first_name":user.first_name,"last_name":user.last_name,"username":user.username,"image":f"nshah.pythonanywhere.com/media/{user.image_url}"}
+        return JsonResponse({"success":True , "data":data })

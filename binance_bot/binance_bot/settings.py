@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     'kyc_app',
     'discount',
     'razorpay_app',
+    'admin_panel',
 ]
 
 MIDDLEWARE = [

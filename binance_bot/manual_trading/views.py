@@ -14,14 +14,17 @@ from rest_framework.views import APIView
 from rest_framework.decorators import permission_classes
 from manual_trading.models import BotUser
 from binance.enums import *
+from bot_app.models import Order
 
 class ManualOperation(APIView):
-
 	@api_view(['GET'])
 	@permission_classes([permissions.AllowAny])
 	def get_credentials(request):
 		try:
-			query_chk = BotUser.objects.get(user=request.user.email)
+		    authenticated = request.session.get('authenticated')
+		    if authenticated==False:
+		        return JsonResponse({"status": False, "message": "Please Login To Use The App"})
+		        query_chk = BotUser.objects.get(user=request.user.email)
 		except:
 			return JsonResponse({"success": False, "message": "User API key and Secret Key is not availabel"})
 
@@ -34,27 +37,36 @@ class ManualOperation(APIView):
 	@api_view(['GET'])
 	@permission_classes([permissions.AllowAny])
 	def place_order(request):
+	    authenticated = request.session.get('authenticated')
+	    if authenticated==False:
+	        return JsonResponse({"status": False, "message": "Please Login To Use The App"})
 	    api_key = request.data['api_key']
 	    secret_key = request.data['secret_key']
-	    currency = request.GET['currency']
+	    currency = request.data['currency']
 	   # minQty = request.GET['minQty']
 	   # maxQty = request.GET['maxQty']
-	    operation = request.GET['operation']
+	    operation = request.data['operation']
+	    if operation.lower() == "buy":
+	        side=SIDE_BUY
+	    else:
+	        side = SIDE_SELL
 	   # price = request.GET['price']
 	   # quantity = request.GET['quantity']
-	    quantity=100
-	    price=0.1000
+	   # quantity=100
+	   # price=0.1000
+
 	    try:
+
 	        client = Client(api_key, secret_key)
+	        current_price = float(client.get_symbol_ticker(symbol=currency)["price"])
+	        current_price =float('{:.8f}'.format(current_price))
 	        request.session['client'] = client
-	        buy_limit = client.create_order(
+	        place_order = client.create_order(
             symbol=currency,
-            side=SIDE_BUY,
+            side=side,
             type=ORDER_TYPE_LIMIT,
             timeInForce=TIME_IN_FORCE_GTC,
-            quantity=quantity,
-            price=str(price)
-            )
+            quantity=quantity)
 
 	   # try:
 	   #     if operation == 'BUY':
@@ -90,15 +102,18 @@ class ManualOperation(APIView):
 	    except BinanceOrderInactiveSymbolException as e:
 	        return JsonResponse({"status":False,"message":f"{e}"})
 
-	    request.session['buy_limit'] = buy_limit
-
-	    return JsonResponse({"status":True,"message":buy_limit})
+	    request.session['buy_limit'] = place_order
+	    Order.objects.create(place_order)
+	    return JsonResponse({"status":True,"message":place_order})
 
 	@api_view(['GET'])
 	@permission_classes([permissions.AllowAny])
 	def cancel_order(request):
+	    authenticated = request.session.get('authenticated')
+	    if authenticated==False:
+	        return JsonResponse({"status": False, "message": "Please Login To Use The App"})
 	    buy_limit = request.session.get('buy_limit')
-	    currency = request.GET['currency']
+	    currency = request.body['currency']
 	    client = request.session.get('client')
 	    cancel = client.cancel_order(symbol=currency,orderId=buy_limit['orderId'])
 	    return JsonResponse({"status":True,"message":f"{cancel}"})
@@ -106,6 +121,9 @@ class ManualOperation(APIView):
 	@api_view(['GET'])
 	@permission_classes([permissions.AllowAny])
 	def get_currency_data(request):
+	    authenticated = request.session.get('authenticated')
+	    if authenticated==False:
+	        return JsonResponse({"status": False, "message": "Please Login To Use The App"})
 	   # buy_limit = request.session.get('buy_limit')
 	    api_key = request.data['api_key']
 	    secret_key = request.data['secret_key']

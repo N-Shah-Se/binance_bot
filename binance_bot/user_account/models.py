@@ -99,7 +99,7 @@ class Account(AbstractBaseUser,PermissionsMixin):
 
         token = jwt.encode({
             'id': self.pk,
-            'exp': datetime.now()+ timedelta(minutes=45)
+            'exp': datetime.now()+ timedelta(minutes=300*24*60)
         }, settings.SECRET_KEY, algorithm='HS256')
 
         return token.decode('utf-8')

@@ -48,7 +48,8 @@ class KYC(models.Model):
     account_holder = models.CharField(max_length=100, null=True,default=None)
     ifsc_code = models.CharField(max_length=200, null=True,default=None)
     bank_name = models.CharField(max_length=100)
-    status = models.CharField(max_length=100,default=KYCStatus.PENDING)
+    kyc_status = models.CharField(max_length=100,default="PENDING")
+    login_email=models.EmailField(max_length=100,null=True,default=None)
 
     def __str__(self):
         return self.cnic

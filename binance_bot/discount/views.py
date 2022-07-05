@@ -82,13 +82,13 @@ class discount(APIView):
                 remark_direct = "Bonus By "+ for_account.first_name +"s GFM Prime"
                 DiscountBonus.objects.create(tds=tds,ref_code=gfm_code,account=account,magic_bonus=magic_bonus,balance=balance, bonus_type="direct", remark=remark_direct)
         except Exception as e:
-            return JsonResponse({"success":False , "message":f"{e}" })
+            return JsonResponse({"status":False , "message":f"{e}" })
             # res = serializers.ValidationError({'message':f'{e}', 'status_code':'500'})
             # # res.status_code = 200
             # raise res
         # user = Profile.objects.get(email=request.user.email)
         data = {"ref_no":gfm_code,"tds":"{:.2f}".format(tds),"magic_bonus":"{:.2f}".format(magic_bonus),"balance":"{:.2f}".format(balance)}
-        return JsonResponse({"success":True , "message":data })
+        return JsonResponse({"status":True , "message":data })
 
 
     @api_view(['GET'])
