@@ -27,7 +27,7 @@ mimetypes.add_type("text/css", ".css", True)
 SECRET_KEY = 'django-insecure-82zmq$c7=milj+sswg*ke3w$gk!wd&l=p@grclmv1_9mqdwwec'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['nshah.pythonanywhere.com','127.0.0.1']
 
@@ -152,7 +152,7 @@ USE_TZ = True
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 # STATIC_ROOT="/home/nshah/binance_bot/binance_bot/static"
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+#STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 STATIC_URL = '/static/'
 
 # Actual directory user files go to
