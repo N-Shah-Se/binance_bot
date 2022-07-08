@@ -132,9 +132,9 @@ class UserRegisteration(APIView):
         email = request.session.get('email_otp')
         phone = request.session.get('otp')
         # #        otp = request.session['email_otp']
-        code_exist = Account.objects.filter(invitation_code=invitation_code)
-        if invitation_code != "GFM2803" or code_exist==False:
-            res = serializers.ValidationError({'message':'Invalud Invitation Code', 'status_code':'400'})
+        # code_exist = Account.objects.filter(invitation_code=invitation_code)
+        if invitation_code != "GFM2803" :
+            res = serializers.ValidationError({'message':'Invalid invitation code.', 'status_code':'400'})
             raise res
         elif int(email_otp) != email:
             # return JsonResponse({"success": False, "message": "Email Otp Not Verified"})
@@ -253,23 +253,30 @@ class UserRegisteration(APIView):
         authenticated = request.session.get('authenticated')
         if authenticated==False:
             return JsonResponse({"status": False, "message": "Please Login To Use The App"})
-        password = request.data['password']
-        email = request.session.get('email')
-        phone = request.session.get('phone')
 
-        user = Account.objects.filter(email=email).filter(phone=phone)
-        user.update(password=make_password(password))
-        if user:
-            if status.HTTP_200_OK:
-                return JsonResponse({"success": True, "message": "Password Changed"})
-        elif len(user) == 0:
-            # return JsonResponse({"success": False, "message": "User Record Not Found"})
-            res = serializers.ValidationError({'message':'User not exists, please signup first.', 'status_code':'400'})
-            # res.status_code = 200
-            raise res
+        new_password = request.data['new_password']
+        old_password = request.data['old_password']
+        email = request.session.get('email')
+        # phone = request.session.get('phone')
+        user = Account.objects.get(email=email)
+        if check_password(old_password,user.password):
+            user.password = make_password(new_password)
+            user.save()
+            if user:
+                if status.HTTP_200_OK:
+                    return JsonResponse({"success": True, "message": "Password Changed"})
+            elif len(user) == 0:
+                # return JsonResponse({"success": False, "message": "User Record Not Found"})
+                res = serializers.ValidationError({'message':'User not exists, please signup first.', 'status_code':'400'})
+                # res.status_code = 200
+                raise res
+            else:
+                res = serializers.ValidationError({'message':'Internal Server Error', 'status_code':'500'})
+                # res.status_code = 200
+                raise res
         else:
-            res = serializers.ValidationError({'message':'Internal Server Error', 'status_code':'500'})
-            # res.status_code = 200
+            res = serializers.ValidationError({'message':'Password not matched.', 'status_code':'500'})
+                # res.status_code = 200
             raise res
 
     @api_view(['POST'])

@@ -16,7 +16,9 @@ import requests
 from django.conf import settings
 from user_account.views import send_otp
 from kyc_app.models import KYC
-
+from binance.exceptions import BinanceAPIException,BinanceOrderException,BinanceRequestException,BinanceOrderMinAmountException,BinanceOrderMinPriceException,BinanceOrderMinTotalException,BinanceOrderUnknownSymbolException,BinanceOrderInactiveSymbolException
+from binance.client import Client
+from binance.enums import *
 
 @login_required(login_url='login')
 # @allowedUsers(allowedGroups=['admin'])
@@ -70,16 +72,95 @@ def accounts(request):
 def bot_users(request):
     try:
         bot_users = BotUser.objects.all()
+        user_data = []
         # bot_data = bot_users
-        # for i in bot_users:
-        #     users = Account.objects.filter(email=i['email'])
-        #     user={}
-        #     user['phone'] = users.phone
-        #     user['email'] = users.email
-        return render(request, 'sheet/bot_user.html', {"bot_users":bot_users})
+        for i in bot_users:
+            users = Account.objects.get(email=i.user)
+            user={}
+            user['name'] = users.first_name + ' ' + users.last_name
+            user['phone'] = users.phone
+            user['email'] = users.email
+            user_data.append(user)
+        return render(request, 'sheet/bot_user.html', {"bot_users":user_data})
     except Exception as e:
         bot_users = {}
-        return render(request , 'sheet/bot_user.html', {"bot_users":bot_data})
+        return render(request , 'sheet/bot_user.html', {"bot_users":user_data})
+
+def order(email,side,api_key,secret_key):
+    try:
+        client = Client(api_key, secret_key)
+        current_price = float(client.get_symbol_ticker(symbol=currency)["price"])
+        current_price =float('{:.8f}'.format(current_price))
+        # request.session['client'] = client
+
+        new_order = client.create_test_order(
+        symbol=currency,
+        side=side,
+        type=ORDER_TYPE_LIMIT,
+        timeInForce=TIME_IN_FORCE_GTC,
+        quantity=30,
+        price=current_price)
+    except BinanceAPIException as e:
+        return f"{e}"
+    except BinanceOrderException as e:
+        return f"{e}"
+    except BinanceRequestException as e:
+        return f"{e}"
+    except BinanceOrderMinAmountException as e:
+        return f"{e}"
+    except BinanceOrderMinPriceException as e:
+        return f"{e}"
+    except BinanceOrderMinTotalException as e:
+        return f"{e}"
+    except BinanceOrderUnknownSymbolException as e:
+        return f"{e}"
+    except BinanceOrderInactiveSymbolException as e:
+        return f"{e}"
+    return new_order
+
+@login_required(login_url='login')
+# @allowedUsers(allowedGroups=['customer'])
+def place_order(request):
+    if request.method == 'POST':
+        try:
+            selected_values = request.POST.getlist('check')
+            failed_for= []
+            for email in selected_values:
+                bot_users = BotUser.objects.get(user=email)
+                data = {}
+                side = ''
+                if request.POST.get("buy"):
+                    side = "BUY"
+                    # data['resp'] = order(email,"BUY",bot_users.api_key,bot_users.secret_key)
+                elif request.POST.get("sell"):
+                    side = "SELL"
+                client = Client(bot_users.api_key, bot_users.secret_key)
+                currency = 'XRPUSDT'
+                current_price = float(client.get_symbol_ticker(symbol=currency)["price"])
+                current_price =float('{:.8f}'.format(current_price))
+                # request.session['client'] = client
+                new_order = client.create_test_order(
+                symbol=currency,
+                side=side,
+                type=ORDER_TYPE_LIMIT,
+                timeInForce=TIME_IN_FORCE_GTC,
+                quantity=30,
+                price=current_price)
+                    # data['resp'] = order(email,"SELL",bot_users.api_key,bot_users.secret_key)
+                if new_order:
+                    pass
+                else:
+                    data['email'] = email
+                    data['error'] = new_order
+                    failed_for.append(data)
+                if failed_for:
+                    return redirect('home')
+            return redirect('bot_users')
+        except Exception as ex:
+            return redirect('home')
+            print(f'hello user{ex}')
+    return redirect('bot_users')
+
 
 # @login_required(login_url='login')
 # @allowedUsers(allowedGroups=['customer'])

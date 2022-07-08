@@ -93,7 +93,7 @@ class KycUser(APIView):
             if kyc_status:
                 data = {"kyc_status":kyc_status.kyc_status}
         except Exception as e:
-            return JsonResponse({"success":False , "message":f"{e}" })
+            return JsonResponse({"status":False , "message":"You have not submitted KYC form." })
             # res = serializers.ValidationError({'message':f'{e}', 'status_code':'500'})
             # # res.status_code = 200
             # raise res

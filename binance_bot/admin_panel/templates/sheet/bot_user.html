@@ -111,24 +111,35 @@
                             </div>
                             <table class="table table-hover my-0">
                                 <thead>
+                                <form method="post" action="{% url 'place_order' %}">
+                                    {% csrf_token%}
                                 <tr>
                                     <th>Name</th>
                                     <th class="d-none d-xl-table-cell">Phone</th>
                                     <th class="d-none d-xl-table-cell">Email</th>
-                                    <th>Bot Status</th>
-                                    <th class="d-none d-md-table-cell">Account Created</th>
-                                    <th>Do Manual Trading</th>
+                                    <!--<th>Bot Status</th>-->
+                                    <!--<th class="d-none d-md-table-cell">Choose Currency</th>-->
+                                    <!--<th>Do Manual Trading</th>-->
+                                    <td class="button"><input type="submit" name="buy" value="BUY"/></td>
+                                    <td class="button"><input type="submit" name="sell" value="SELL"/></td>
                                 </tr>
                                 </thead>
                                 <tbody>
+
+
                                 {% for user in bot_users %}
                                 <tr>
-                                    <td>Project Apollo</td>
-                                    <td class="d-none d-xl-table-cell">----</td>
-                                    <td class="d-none d-xl-table-cell">{{user.user}}</td>
-                                    <td><span class="badge bg-success">JUST Dummy Data</span></td>
-                                    <td class="d-none d-md-table-cell">{{user}}</td>
-                                    <td><a></a></td>
+                                    <td>{{user.name}}</td>
+                                    <td class="d-none d-xl-table-cell">{{user.phone}}</td>
+                                    <td class="d-none d-xl-table-cell">{{user.email}}</td>
+                                    <td><input type="checkbox" name="check" id="check" class="check" value="{{user.email}}"/></td>
+                                    <!--<td><select>-->
+                                    <!--    <option>-->
+                                    <!--        XRPUSDT-->
+                                    <!--    </option>-->
+                                    <!--</select></td>-->
+                                    <!--<td class="d-none d-md-table-cell">{{user}}</td>-->
+
                                 </tr>
                                 {% endfor %}
 

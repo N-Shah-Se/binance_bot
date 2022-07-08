@@ -30,7 +30,7 @@ from bot_app.models import Order
 class price_info:
     bid_price = 0
     buy_counter = 0
-    order = ""
+    bot_started = True
 
 class BotOperation(APIView):
     @api_view(['POST'])
@@ -83,7 +83,7 @@ class BotOperation(APIView):
         }
         return JsonResponse({"success": True, "message": "The OTP has been sent to your registered mobile number.","data":data})
 
-    @api_view(['GET'])
+    @api_view(['POST'])
     # @permission_classes([permissions.AllowAny])
     def start_bot(request):
         authenticated = request.session.get('authenticated')
@@ -95,7 +95,7 @@ class BotOperation(APIView):
             tradeA = False
             tradeB = False
             user = ""
-        user_otp = request.body['otp']
+        user_otp = request.data['otp']
         otp = request.session.get('verification_otp')
 
         if int(user_otp) != otp:
@@ -142,7 +142,7 @@ class BotOperation(APIView):
                 print(f"{ex}")
             return order
             #
-        while True:
+        while price_info.bot_started:
             symbol="XRPUSDT"
             try:
                 current_price = float(test_class.client.get_symbol_ticker(symbol=symbol)["price"])
@@ -371,6 +371,28 @@ class BotOperation(APIView):
             # sock = f"wss://stream.binance.com:9443/ws/{i.lower()}@kline_1m"
         return JsonResponse({"data": data_list})
 
+
+    @api_view(['GET'])
+    @permission_classes([permissions.AllowAny])
+    def stop_bot(request):
+        authenticated = request.session.get('authenticated')
+        if authenticated==False:
+            return JsonResponse({"status": False, "message": "Please Login To Use The App"})
+
+        if price_info.bot_started:
+            price_info.bot_started = False
+        else:
+            return JsonResponse({"status": False, "message": "Bot is Already Stoped."})
+        # key = "https://api.binance.com/api/v3/ticker/price?symbol="
+        # currencies = ["BTCUSDT", "ETHUSDT", "AAVEUSDT","XRPUSDT"]
+        # data_list = []
+        # for i in currencies:
+        #     url = key + i
+        #     data = requests.get(url)
+        #     data = data.json()
+        #     data_list.append(data)
+            # sock = f"wss://stream.binance.com:9443/ws/{i.lower()}@kline_1m"
+        return JsonResponse({"status": True, "message": "Bot is stoped Successfully."})
 
 
 
