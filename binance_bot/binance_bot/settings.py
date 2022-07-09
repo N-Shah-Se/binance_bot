@@ -61,6 +61,8 @@ INSTALLED_APPS = [
     'discount',
     'razorpay_app',
     'admin_panel',
+    'insurance_app',
+    'nominee_app',
 ]
 
 MIDDLEWARE = [

@@ -25,5 +25,7 @@ urlpatterns = [
     path('manual_trading/', include('manual_trading.urls')),
     path('kyc/', include('kyc_app.urls')),
     path('discount/', include('discount.urls')),
-    path('razorpay/', include('razorpay_app.urls'))
+    path('razorpay/', include('razorpay_app.urls')),
+    path('insurance/', include('insurance_app.urls')),
+    path('nominee/', include('nominee_app.urls')),
 ] +  static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
