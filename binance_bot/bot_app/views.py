@@ -125,7 +125,7 @@ class BotOperation(APIView):
         client = Client(api_key,secret_key)
         test_class.client=client
         # client = request.session.get('client')
-        def place_order(side, quantity,price, symbol):
+        def place_order(side, quantity,price, symbol,profit='0'):
             try:
                 order = test_class.client.create_order(
                 symbol=symbol,
@@ -137,9 +137,13 @@ class BotOperation(APIView):
                 )
                 print(order)
                 order['email'] = request.user.email
-                Order.objects.create(order)
             except BinanceAPIException as ex:
                 print(f"{ex}")
+            # Order.objects.create(order)
+            if side==SIDE_SELL:
+                order['profit'] = profit
+            order_data = Order(**order)
+            order_data.save()
             return order
             #
         while price_info.bot_started:
@@ -174,7 +178,7 @@ class BotOperation(APIView):
                         print(current_price)
                         test_class.tradeA=True
                         test_class.bidding = current_price
-                        order = place_order(SIDE_SELL, 29, current_price, symbol)
+                        order = place_order(SIDE_SELL, 29, current_price, symbol,per1)
                         print(f"{order}:::current_price{current_price}")
                     elif current_price <= per1_loss and test_class.tradeB==False:
                         print("buy")
@@ -395,6 +399,27 @@ class BotOperation(APIView):
         return JsonResponse({"status": True, "message": "Bot is stoped Successfully."})
 
 
+    @api_view(['GET'])
+    @permission_classes([permissions.AllowAny])
+    def trade_profit(request):
+        authenticated = request.session.get('authenticated')
+        if authenticated==False:
+            return JsonResponse({"status": False, "message": "Please Login To Use The App"})
+        order_data =Order.objects.filter(side="SELL").filter(email=request.user.email)
+        total_data = []
+
+        sum = 0.0
+        if order_data:
+            for prof in order_data:
+                user_profit_data = {}
+                user_profit_data['transactTime'] = prof.transactTime
+                user_profit = float(prof.profit)
+                user_profit_data['user_profit'] = user_profit
+                sum += user_profit
+                total_data.append(user_profit_data)
+        data = {"sum":sum,'individual':total_data}
+
+        return JsonResponse({"data": data })
 
 
 
