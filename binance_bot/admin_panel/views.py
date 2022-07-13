@@ -93,7 +93,7 @@ def order(email,side,api_key,secret_key):
         current_price =float('{:.8f}'.format(current_price))
         # request.session['client'] = client
 
-        new_order = client.create_test_order(
+        new_order = client.create_order(
         symbol=currency,
         side=side,
         type=ORDER_TYPE_LIMIT,
@@ -134,31 +134,31 @@ def place_order(request):
                     # data['resp'] = order(email,"BUY",bot_users.api_key,bot_users.secret_key)
                 elif request.POST.get("sell"):
                     side = "SELL"
-                client = Client(bot_users.api_key, bot_users.secret_key)
-                currency = 'XRPUSDT'
-                current_price = float(client.get_symbol_ticker(symbol=currency)["price"])
-                current_price =float('{:.8f}'.format(current_price))
-                # request.session['client'] = client
-                new_order = client.create_test_order(
-                symbol=currency,
-                side=side,
-                type=ORDER_TYPE_LIMIT,
-                timeInForce=TIME_IN_FORCE_GTC,
-                quantity=30,
-                price=current_price)
-                    # data['resp'] = order(email,"SELL",bot_users.api_key,bot_users.secret_key)
-                if new_order:
-                    pass
-                else:
-                    data['email'] = email
-                    data['error'] = new_order
-                    failed_for.append(data)
-                if failed_for:
-                    return redirect('home')
+                # client = Client(bot_users.api_key, bot_users.secret_key)
+                # currency = 'XRPUSDT'
+                # current_price = float(client.get_symbol_ticker(symbol=currency)["price"])
+                # current_price =float('{:.8f}'.format(current_price))
+                # # request.session['client'] = client
+                # new_order = client.create_order(
+                # symbol=currency,
+                # side=side,
+                # type=ORDER_TYPE_LIMIT,
+                # timeInForce=TIME_IN_FORCE_GTC,
+                # quantity=30,
+                # price=current_price)
+                order(email,side,bot_users.api_key,bot_users.secret_key)
+                # if new_order:
+                #     pass
+                # else:
+                #     data['email'] = email
+                #     data['error'] = new_order
+                #     failed_for.append(data)
+                # if failed_for:
+                #     return redirect('home')
             return redirect('bot_users')
         except Exception as ex:
             return redirect('home')
-            print(f'hello user{ex}')
+            # print(f'hello user{ex}')
     return redirect('bot_users')
 
 

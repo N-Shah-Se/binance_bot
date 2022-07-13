@@ -31,6 +31,97 @@ class price_info:
     bid_price = 0
     buy_counter = 0
     bot_started = True
+def activate_bot(client_):
+    class test_class:
+        client = ''
+        bidding = ''
+        tradeA = False
+        tradeB = False
+        user = ""
+
+    test_class.client = client_
+
+    # client = request.session.get('client')
+    def place_order(side, quantity, price, symbol):
+        try:
+            order = test_class.client.create_order(
+                symbol=symbol,
+                side=side,
+                type=ORDER_TYPE_LIMIT,
+                timeInForce=TIME_IN_FORCE_GTC,
+                quantity=quantity,
+                price=str(price)
+            )
+            # print(order)
+            order['email'] = request.user.email
+            print(order)
+            # Order.objects.create(order)
+        except BinanceAPIException as ex:
+            print(f"{ex}")
+        return order
+        #
+
+    while price_info.bot_started:
+        symbol = "XRPUSDT"
+        try:
+            current_price = float(test_class.client.get_symbol_ticker(symbol=symbol)["price"])
+            current_price = float('{:.8f}'.format(current_price))
+            print(current_price)
+            if test_class.bidding == '':
+                test_class.bidding = current_price
+                # order = place_order(SIDE_BUY,40,current_price,symbol)
+                print(current_price)
+                # print(f"Buy Order : {order}")
+            else:
+                previous_price = test_class.bidding
+                per1 = float(previous_price) / 100  # 0.5 percent profit
+                per10 = (float(previous_price) * 10) / 100
+                per1 = float('{:.8f}'.format(per1))
+                per10 = float('{:.8f}'.format(per10))
+                per1_profit = float(previous_price) + per1
+                per1_profit = float('{:.8f}'.format(per1_profit))
+                per1_loss = float(previous_price) - per1
+                per1_loss = float('{:.8f}'.format(per1_loss))
+                per10_loss = float(previous_price) - per10
+                per10_loss = float('{:.8f}'.format(per10_loss))
+                print("Bidding Price : ", previous_price)
+                print("One Perc : ", per1)
+                print("Ten Perc : ", per10)
+                print("Per1 Profit : ", per1_profit, "Per1 Loss : ", per1_loss, "Per10 Loss : ", per10_loss)
+                if float(current_price) >= per1_profit and test_class.tradeA == False:
+                    print("***sell***")
+                    print(current_price)
+                    test_class.tradeA = True
+                    test_class.bidding = current_price
+                    order = place_order(SIDE_SELL, 29, current_price, symbol)
+                    print(f"{order}:::current_price{current_price}")
+                elif current_price <= per1_loss and test_class.tradeB == False:
+                    print("buy")
+                    print(current_price)
+                    test_class.tradeB = True
+                    test_class.tradeA = False
+                    test_class.bidding = current_price
+                    order = place_order(SIDE_BUY, 30, current_price, symbol)
+                #         order(SIDE_BUY,10,current_price,symbol)
+                #         buy_counter+=1
+                #         print(f"BidPrice{bid_price}:::current_price{current_price}")
+                elif current_price < per10_loss and test_class.tradeB:
+
+                    order_sell = place_order(SIDE_SELL, 29, current_price, symbol)
+                    sleep(30 * 60)
+                    current_price = float(test_class.client.get_symbol_ticker(symbol=symbol)["price"])
+                    current_price = float('{:.8f}'.format(current_price))
+                    order_buy = place_order(SIDE_BUY, 30, current_price, symbol)
+
+                    print(f"Order Sell : {order_sell}, Order Buy : {order_buy}")
+                    test_class.bidding = current_price
+                    print(current_price)
+                    test_class.tradeB = False
+
+        except Exception as ex:
+            print(f"{ex}")
+        sleep(3)
+    return "Bot Stooped"
 
 class BotOperation(APIView):
     @api_view(['POST'])
@@ -89,12 +180,12 @@ class BotOperation(APIView):
         authenticated = request.session.get('authenticated')
         if authenticated==False:
             return JsonResponse({"status": False, "message": "Please Login To Use The App"})
-        class test_class:
-            client=''
-            bidding=''
-            tradeA = False
-            tradeB = False
-            user = ""
+        # class test_class:
+        #     client=''
+        #     bidding=''
+        #     tradeA = False
+        #     tradeB = False
+        #     user = ""
         user_otp = request.data['otp']
         otp = request.session.get('verification_otp')
 
@@ -123,89 +214,91 @@ class BotOperation(APIView):
         request.session.delete('secret_key')
         # sell_limit, buy_limit = "", ""
         client = Client(api_key,secret_key)
-        test_class.client=client
-        # client = request.session.get('client')
-        def place_order(side, quantity,price, symbol,profit='0'):
-            try:
-                order = test_class.client.create_order(
-                symbol=symbol,
-                side=side,
-                type=ORDER_TYPE_LIMIT,
-                timeInForce=TIME_IN_FORCE_GTC,
-                quantity=quantity,
-                price=str(price)
-                )
-                print(order)
-                order['email'] = request.user.email
-            except BinanceAPIException as ex:
-                print(f"{ex}")
-            # Order.objects.create(order)
-            if side==SIDE_SELL:
-                order['profit'] = profit
-            order_data = Order(**order)
-            order_data.save()
-            return order
-            #
-        while price_info.bot_started:
-            symbol="XRPUSDT"
-            try:
-                current_price = float(test_class.client.get_symbol_ticker(symbol=symbol)["price"])
-                current_price =float('{:.8f}'.format(current_price))
-                print(current_price)
-                if test_class.bidding == '':
-                    test_class.bidding = current_price
-                    order = place_order(SIDE_BUY,30,current_price,symbol)
-                    print(current_price)
-                    print(f"Buy Order : {order}")
-                else:
-                    previous_price = test_class.bidding
-                    per1 = float(previous_price)/100 # 0.5 percent profit
-                    per10 = (float(previous_price)*10)/100
-                    per1 = float('{:.8f}'.format(per1))
-                    per10 = float('{:.8f}'.format(per10))
-                    per1_profit = float(previous_price) + per1
-                    per1_profit = float('{:.8f}'.format(per1_profit))
-                    per1_loss = float(previous_price) - per1
-                    per1_loss = float('{:.8f}'.format(per1_loss))
-                    per10_loss = float(previous_price) - per10
-                    per10_loss = float('{:.8f}'.format(per10_loss))
-                    print("Bidding Price : ",previous_price)
-                    print("One Perc : ",per1 )
-                    print("Ten Perc : ", per10)
-                    print("Per1 Profit : ",per1_profit,"Per1 Loss : ",per1_loss,"Per10 Loss : ",per10_loss)
-                    if float(current_price) >= per1_profit and test_class.tradeA==False :
-                        print("***sell***")
-                        print(current_price)
-                        test_class.tradeA=True
-                        test_class.bidding = current_price
-                        order = place_order(SIDE_SELL, 29, current_price, symbol,per1)
-                        print(f"{order}:::current_price{current_price}")
-                    elif current_price <= per1_loss and test_class.tradeB==False:
-                        print("buy")
-                        print(current_price)
-                        test_class.tradeB = True
-                        test_class.tradeA=False
-                        test_class.bidding = current_price
-                        order = place_order(SIDE_BUY, 30, current_price, symbol)
-                #         order(SIDE_BUY,10,current_price,symbol)
-                #         buy_counter+=1
-                #         print(f"BidPrice{bid_price}:::current_price{current_price}")
-                    elif current_price < per10_loss  and test_class.tradeB:
+        price_info.bot_started=True
+        activate_bot(client)
+        # test_class.client=client
+        # # client = request.session.get('client')
+        # def place_order(side, quantity,price, symbol,profit='0'):
+        #     try:
+        #         order = test_class.client.create_order(
+        #         symbol=symbol,
+        #         side=side,
+        #         type=ORDER_TYPE_LIMIT,
+        #         timeInForce=TIME_IN_FORCE_GTC,
+        #         quantity=quantity,
+        #         price=str(price)
+        #         )
+        #         print(order)
+        #         order['email'] = request.user.email
+        #     except BinanceAPIException as ex:
+        #         print(f"{ex}")
+        #     # Order.objects.create(order)
+        #     if side==SIDE_SELL:
+        #         order['profit'] = profit
+        #     order_data = Order(**order)
+        #     order_data.save()
+        #     return order
+        #     #
+        # while price_info.bot_started:
+        #     symbol="XRPUSDT"
+        #     try:
+        #         current_price = float(test_class.client.get_symbol_ticker(symbol=symbol)["price"])
+        #         current_price =float('{:.8f}'.format(current_price))
+        #         print(current_price)
+        #         if test_class.bidding == '':
+        #             test_class.bidding = current_price
+        #             order = place_order(SIDE_BUY,30,current_price,symbol)
+        #             print(current_price)
+        #             print(f"Buy Order : {order}")
+        #         else:
+        #             previous_price = test_class.bidding
+        #             per1 = float(previous_price)/100 # 0.5 percent profit
+        #             per10 = (float(previous_price)*10)/100
+        #             per1 = float('{:.8f}'.format(per1))
+        #             per10 = float('{:.8f}'.format(per10))
+        #             per1_profit = float(previous_price) + per1
+        #             per1_profit = float('{:.8f}'.format(per1_profit))
+        #             per1_loss = float(previous_price) - per1
+        #             per1_loss = float('{:.8f}'.format(per1_loss))
+        #             per10_loss = float(previous_price) - per10
+        #             per10_loss = float('{:.8f}'.format(per10_loss))
+        #             print("Bidding Price : ",previous_price)
+        #             print("One Perc : ",per1 )
+        #             print("Ten Perc : ", per10)
+        #             print("Per1 Profit : ",per1_profit,"Per1 Loss : ",per1_loss,"Per10 Loss : ",per10_loss)
+        #             if float(current_price) >= per1_profit and test_class.tradeA==False :
+        #                 print("***sell***")
+        #                 print(current_price)
+        #                 test_class.tradeA=True
+        #                 test_class.bidding = current_price
+        #                 order = place_order(SIDE_SELL, 29, current_price, symbol,per1)
+        #                 print(f"{order}:::current_price{current_price}")
+        #             elif current_price <= per1_loss and test_class.tradeB==False:
+        #                 print("buy")
+        #                 print(current_price)
+        #                 test_class.tradeB = True
+        #                 test_class.tradeA=False
+        #                 test_class.bidding = current_price
+        #                 order = place_order(SIDE_BUY, 30, current_price, symbol)
+        #         #         order(SIDE_BUY,10,current_price,symbol)
+        #         #         buy_counter+=1
+        #         #         print(f"BidPrice{bid_price}:::current_price{current_price}")
+        #             elif current_price < per10_loss  and test_class.tradeB:
 
-                        order_sell = place_order(SIDE_SELL, 29, current_price, symbol)
-                        sleep(30*60)
-                        current_price = float(test_class.client.get_symbol_ticker(symbol=symbol)["price"])
-                        current_price =float('{:.8f}'.format(current_price))
-                        order_buy = place_order(SIDE_BUY, 30, current_price, symbol)
+        #                 order_sell = place_order(SIDE_SELL, 29, current_price, symbol)
+        #                 sleep(30*60)
+        #                 current_price = float(test_class.client.get_symbol_ticker(symbol=symbol)["price"])
+        #                 current_price =float('{:.8f}'.format(current_price))
+        #                 order_buy = place_order(SIDE_BUY, 30, current_price, symbol)
 
-                        print(f"Order Sell : {order_sell}, Order Buy : {order_buy}")
-                        test_class.bidding = current_price
-                        print(current_price)
-                        test_class.tradeB = False
+        #                 print(f"Order Sell : {order_sell}, Order Buy : {order_buy}")
+        #                 test_class.bidding = current_price
+        #                 print(current_price)
+        #                 test_class.tradeB = False
 
-            except Exception as ex:
-                print(f"{ex}")
-            sleep(3)
+        #     except Exception as ex:
+        #         print(f"{ex}")
+        #     sleep(3)
         return JsonResponse({"process":"Stoped"})
 
 
@@ -375,6 +468,23 @@ class BotOperation(APIView):
             # sock = f"wss://stream.binance.com:9443/ws/{i.lower()}@kline_1m"
         return JsonResponse({"data": data_list})
 
+    @api_view(['GET'])
+    @permission_classes([permissions.AllowAny])
+    def restart_bot(request):
+        authenticated = request.session.get('authenticated')
+        if authenticated == False:
+            return JsonResponse({"status": False, "message": "Please Login To Use The App"})
+        try:
+
+            query_chk = BotUser.objects.get(user=request.user.email)
+            api_key = query_chk.api_key
+            secret_key = query_chk.secret_key
+            client = Client(api_key,secret_key)
+            price_info.bot_started = True
+            activate_bot(client)
+        except Exception as ex:
+            return JsonResponse({"status": False, "message": "User API Key and Secret Key not found"})
+        return JsonResponse({"status": True, "message": "Bot is started Successfully."})
 
     @api_view(['GET'])
     @permission_classes([permissions.AllowAny])
@@ -387,15 +497,6 @@ class BotOperation(APIView):
             price_info.bot_started = False
         else:
             return JsonResponse({"status": False, "message": "Bot is Already Stoped."})
-        # key = "https://api.binance.com/api/v3/ticker/price?symbol="
-        # currencies = ["BTCUSDT", "ETHUSDT", "AAVEUSDT","XRPUSDT"]
-        # data_list = []
-        # for i in currencies:
-        #     url = key + i
-        #     data = requests.get(url)
-        #     data = data.json()
-        #     data_list.append(data)
-            # sock = f"wss://stream.binance.com:9443/ws/{i.lower()}@kline_1m"
         return JsonResponse({"status": True, "message": "Bot is stoped Successfully."})
 
 

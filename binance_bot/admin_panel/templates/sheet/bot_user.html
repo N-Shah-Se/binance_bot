@@ -100,7 +100,7 @@
         <main class="content">
             <div class="container-fluid p-0">
 
-                <h1 class="h3 mb-3"><strong>Accounts</strong> Dashboard</h1>
+                <h1 class="h3 mb-3"><strong>Bot Users</strong> Dashboard</h1>
 
                 <div class="row">
                     <div class="col-12 col-lg-12 col-xxl-12 d-flex">
@@ -120,8 +120,12 @@
                                     <!--<th>Bot Status</th>-->
                                     <!--<th class="d-none d-md-table-cell">Choose Currency</th>-->
                                     <!--<th>Do Manual Trading</th>-->
-                                    <td class="button"><input type="submit" name="buy" value="BUY"/></td>
-                                    <td class="button"><input type="submit" name="sell" value="SELL"/></td>
+                                    <th class="text-center"><input type="submit" name="buy" value="BUY" class="btn btn-lg btn-secondary"/>
+                                    <!--</th>-->
+                                    <!--<th><input type="submit" name="sell" value="SELL"/></th>-->
+										<!--<th>-->
+												 <input type="submit" name="sell" value="SELL" class="btn btn-lg btn-secondary">
+										</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -132,7 +136,7 @@
                                     <td>{{user.name}}</td>
                                     <td class="d-none d-xl-table-cell">{{user.phone}}</td>
                                     <td class="d-none d-xl-table-cell">{{user.email}}</td>
-                                    <td><input type="checkbox" name="check" id="check" class="check" value="{{user.email}}"/></td>
+                                    <td class="text-center"><input type="checkbox" name="check" id="check" class="check" value="{{user.email}}"/></td>
                                     <!--<td><select>-->
                                     <!--    <option>-->
                                     <!--        XRPUSDT-->
