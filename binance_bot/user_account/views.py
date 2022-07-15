@@ -149,8 +149,8 @@ class UserRegisteration(APIView):
         phone = request.session.get('phone')
 
         # hash_pwd = make_password(password)
-        emails = Account.objects.filter(email=email_otp)
-        phone_no = Account.objects.filter(phone=phone_otp)
+        emails = Account.objects.filter(email=email)
+        phone_no = Account.objects.filter(phone=phone)
         account_exist = False
         if emails:
             account_exist = True
@@ -271,13 +271,15 @@ class UserRegisteration(APIView):
                 # res.status_code = 200
                 raise res
             else:
-                res = serializers.ValidationError({'message':'Internal Server Error', 'status_code':'500'})
+                res = serializers.ValidationError({'message':'Failed changing password.', 'status_code':'500'})
                 # res.status_code = 200
                 raise res
         else:
             res = serializers.ValidationError({'message':'Password not matched.', 'status_code':'500'})
                 # res.status_code = 200
             raise res
+
+        return  JsonResponse({"success": True, "message": "Password Changed"})
 
     @api_view(['POST'])
     @permission_classes([permissions.AllowAny])

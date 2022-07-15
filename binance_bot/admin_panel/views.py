@@ -100,22 +100,24 @@ def order(email,side,api_key,secret_key):
         timeInForce=TIME_IN_FORCE_GTC,
         quantity=30,
         price=current_price)
-    except BinanceAPIException as e:
-        return f"{e}"
-    except BinanceOrderException as e:
-        return f"{e}"
-    except BinanceRequestException as e:
-        return f"{e}"
-    except BinanceOrderMinAmountException as e:
-        return f"{e}"
-    except BinanceOrderMinPriceException as e:
-        return f"{e}"
-    except BinanceOrderMinTotalException as e:
-        return f"{e}"
-    except BinanceOrderUnknownSymbolException as e:
-        return f"{e}"
-    except BinanceOrderInactiveSymbolException as e:
-        return f"{e}"
+    # except BinanceAPIException as e:
+    #     return f"{e}"
+    # except BinanceOrderException as e:
+    #     return f"{e}"
+    # except BinanceRequestException as e:
+    #     return f"{e}"
+    # except BinanceOrderMinAmountException as e:
+    #     return f"{e}"
+    # except BinanceOrderMinPriceException as e:
+    #     return f"{e}"
+    # except BinanceOrderMinTotalException as e:
+    #     return f"{e}"
+    # except BinanceOrderUnknownSymbolException as e:
+    #     return f"{e}"
+    # except BinanceOrderInactiveSymbolException as e:
+    #     return f"{e}"
+    except:
+        return ""
     return new_order
 
 @login_required(login_url='login')
