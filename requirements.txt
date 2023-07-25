@@ -1,6 +1,6 @@
 asgiref==3.5.1
 cached-properties==0.7.4
-certifi==2021.10.8
+certifi==2023.7.22
 charset-normalizer==2.0.12
 Django==3.2.13
 django-filter==21.1
