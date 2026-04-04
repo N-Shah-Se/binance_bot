@@ -12,7 +12,7 @@ numpy==1.21.6
 pyotp==2.6.0
 pytz==2022.1
 requests==2.27.1
-sqlparse==0.4.2
+sqlparse==0.4.4
 typing_extensions==4.2.0
 urllib3==1.26.9
 zipp==3.8.0
